@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BFP-NIR Regional Monitoring Management System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- TOP HEADER / NAVIGATION -->
+  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="bg-rose-600 p-2.5 rounded-xl text-white font-bold text-xl shadow-lg shadow-rose-600/30">
+        🛡️
+      </div>
+      <div>
+        <h1 class="text-lg font-bold text-white tracking-wide">BFP-NIR REGIONAL MONITORING MANAGEMENT SYSTEM</h1>
+        <p class="text-xs text-slate-400">REAL-TIME EXECUTIVE MONITORING PANEL</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <button class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-md shadow-rose-600/20 flex items-center gap-2">
+        📈 Summary Dashboard
+      </button>
+      <button class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2 rounded-lg border border-slate-700 transition flex items-center gap-2">
+        🗺️ NIR Fire Station Map
+      </button>
+      
+      <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-full text-xs shadow-inner">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="text-slate-300 font-mono font-semibold">LIVE SYNC</span>
+        <span id="lastSyncTime" class="text-slate-500 font-mono text-[11px] border-l border-slate-800 pl-2">--:--:--</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER LAYOUT -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="w-72 bg-slate-900/60 border-r border-slate-800 p-4 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">NIR Staff Sections</h2>
+          <button class="text-emerald-400 hover:text-emerald-300 text-sm font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">+</button>
+        </div>
+        <p class="text-xs text-slate-500 mb-4">Select a ledger to update records</p>
+
+        <nav class="space-y-1.5">
+          <button data-section="fire-ops" class="section-btn w-full flex items-center justify-between p-3.5 rounded-xl text-white bg-slate-800 border-l-4 border-rose-500 shadow-md transition active">
+            <span class="flex items-center gap-3 font-semibold text-sm"><span>🔥</span> Fire Operations Center</span>
+            <span class="bg-slate-700/80 px-2.5 py-0.5 rounded-md text-xs text-slate-200 font-mono">5</span>
+          </button>
+          <button data-section="admin-hr" class="section-btn w-full flex items-center justify-between p-3.5 rounded-xl text-slate-300 hover:bg-slate-800/60 transition">
+            <span class="flex items-center gap-3 font-medium text-sm"><span>👤</span> Administrative & HR</span>
+            <span class="bg-slate-800 px-2.5 py-0.5 rounded-md text-xs text-slate-400 font-mono">5</span>
+          </button>
+          <button data-section="logistics" class="section-btn w-full flex items-center justify-between p-3.5 rounded-xl text-slate-300 hover:bg-slate-800/60 transition">
+            <span class="flex items-center gap-3 font-medium text-sm"><span>🔧</span> Logistics & Infrastructure</span>
+            <span class="bg-slate-800 px-2.5 py-0.5 rounded-md text-xs text-slate-400 font-mono">5</span>
+          </button>
+          <button data-section="fses" class="section-btn w-full flex items-center justify-between p-3.5 rounded-xl text-slate-300 hover:bg-slate-800/60 transition">
+            <span class="flex items-center gap-3 font-medium text-sm"><span>📜</span> Fire Safety Enforcement</span>
+            <span class="bg-slate-800 px-2.5 py-0.5 rounded-md text-xs text-slate-400 font-mono">5</span>
+          </button>
+          <button data-section="ict" class="section-btn w-full flex items-center justify-between p-3.5 rounded-xl text-slate-300 hover:bg-slate-800/60 transition">
+            <span class="flex items-center gap-3 font-medium text-sm"><span>📡</span> ICT & Cyber Operations</span>
+            <span class="bg-slate-800 px-2.5 py-0.5 rounded-md text-xs text-slate-400 font-mono">4</span>
+          </button>
+          <button data-section="finance" class="section-btn w-full flex items-center justify-between p-3.5 rounded-xl text-slate-300 hover:bg-slate-800/60 transition">
+            <span class="flex items-center gap-3 font-medium text-sm"><span>💰</span> Finance & Budget Section</span>
+            <span class="bg-slate-800 px-2.5 py-0.5 rounded-md text-xs text-slate-400 font-mono">4</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800">
+        <span class="text-[11px] text-slate-500 uppercase tracking-wider block mb-1">Projection Sync Status</span>
+        <p class="text-xs text-emerald-400 flex items-center gap-1.5 font-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Hooks Active
+        </p>
+      </div>
+    </aside>
+
+    <!-- MAIN DASHBOARD CONTENT AREA -->
+    <main class="flex-1 p-8 overflow-y-auto space-y-8">
+
+      <!-- CRITICAL ALERT NOTIFICATION BANNER -->
+      <div id="criticalAlertBanner" class="hidden bg-rose-950/90 border-2 border-rose-500 rounded-2xl p-5 shadow-2xl shadow-rose-950/50 backdrop-blur-md animate-pulse">
+        <div class="flex items-start gap-4">
+          <div class="bg-rose-600 p-3 rounded-xl text-white font-extrabold text-2xl flex-shrink-0 animate-bounce">
+            ⚠️
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <h3 class="text-rose-200 font-extrabold text-sm uppercase tracking-wider flex items-center gap-2">
+                <span>CRITICAL OPERATIONAL ALERT</span>
+                <span id="alertStationCountBadge" class="bg-rose-600 text-white text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold">0 STATIONS AFFECTED</span>
+              </h3>
+            </div>
+            
+            <p id="criticalAlertMessage" class="text-rose-100 text-xs font-semibold mt-1 leading-relaxed font-mono">
+              Analyzing operational readiness...
+            </p>
+
+            <div id="criticalStationsContainer" class="mt-3 flex flex-wrap gap-2">
+              <!-- Affected Station Badges appended here dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROL BAR & SUMMARY MATRIX SECTION -->
+      <section class="space-y-5">
+        <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-xl backdrop-blur-sm">
+          
+          <h2 id="hudTitle" class="text-sm font-extrabold text-slate-200 uppercase tracking-widest flex items-center gap-2.5">
+            <span class="text-lg">🔥</span> FIRE OPERATIONS CENTER — SUMMARY MATRIX
+          </h2>
+
+          <div class="flex flex-wrap items-center gap-3.5 w-full xl:w-auto">
+            
+            <!-- PROVINCE FILTER BUTTONS -->
+            <div class="flex items-center gap-1 bg-slate-950 p-1.5 rounded-xl border border-slate-800/80 shadow-inner">
+              <button data-province="ALL" class="prov-btn text-xs font-bold px-3.5 py-2 rounded-lg transition-all duration-200 bg-rose-600 text-white shadow-md shadow-rose-600/30">
+                ALL NIR
+              </button>
+              <button data-province="occidental" class="prov-btn text-xs font-bold px-3.5 py-2 rounded-lg transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/80">
+                Negros Occidental
+              </button>
+              <button data-province="oriental" class="prov-btn text-xs font-bold px-3.5 py-2 rounded-lg transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/80">
+                Negros Oriental
+              </button>
+              <button data-province="siquijor" class="prov-btn text-xs font-bold px-3.5 py-2 rounded-lg transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/80">
+                Siquijor
+              </button>
+            </div>
+
+            <!-- STATION FILTER DROPDOWN -->
+            <div class="flex items-center gap-2.5 bg-slate-950 border border-slate-800/80 px-3.5 py-2 rounded-xl text-xs shadow-inner">
+              <span class="text-slate-400 font-bold flex items-center gap-1.5">📍 Station:</span>
+              <select id="stationFilter" class="bg-slate-900 text-slate-100 border border-slate-700/80 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono text-xs font-medium">
+                <option value="ALL">ALL STATIONS</option>
+              </select>
+            </div>
+
+            <span class="text-xs text-emerald-400 font-mono font-semibold bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/20 whitespace-nowrap shadow-sm">
+              ⚡ REAL-TIME SYNC
+            </span>
+          </div>
+        </div>
+
+        <!-- DYNAMIC SUMMARY WIDGETS -->
+        <div id="hudWidgetsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
+          <!-- Dynamically populated metric cards -->
+        </div>
+      </section>
+
+      <!-- LIVE GOOGLE SHEET TABLE -->
+      <div class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-6 shadow-2xl backdrop-blur-sm">
+        <div class="flex items-center justify-between mb-5 border-b border-slate-800/80 pb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="text-rose-500 text-xl">🗃️</span>
+            <h2 id="tableMainTitle" class="text-rose-500 font-extrabold text-sm tracking-wider uppercase">
+              Live Google Sheets Operations Table
+            </h2>
+          </div>
+          <span class="text-xs text-slate-500 font-mono">Real-time sync active</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead id="mainTableHead"></thead>
+            <tbody id="mainTableBody" class="divide-y divide-slate-800/60 font-mono text-xs">
+              <tr><td colspan="10" class="p-6 text-center text-slate-500">Loading live data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    const SECTION_CONFIGS = {
+      'fire-ops': { sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc', gid: '298294760', title: 'Fire Operations Center' },
+      'admin-hr': { sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc', gid: '0', title: 'Administrative & HR' },
+      'logistics': { sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc', gid: '0', title: 'Logistics & Infrastructure' },
+      'fses': { sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc', gid: '0', title: 'Fire Safety Enforcement' },
+      'ict': { sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc', gid: '0', title: 'ICT & Cyber Operations' },
+      'finance': { sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc', gid: '0', title: 'Finance & Budget Section' }
+    };
+
+    let currentSectionKey = 'fire-ops';
+    let currentProvinceFilter = 'ALL';
+    let globalHeaders = [];
+    let globalRowsForWidgets = [];
+    let processedHeaders = [];
+    let processedRows = [];
+
+    function parseCsvLine(text) {
+      const result = [];
+      let cell = '', inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === '"') inQuotes = !inQuotes;
+        else if (char === ',' && !inQuotes) { result.push(cell.trim().replace(/^"|"$/g, '')); cell = ''; }
+        else cell += char;
+      }
+      result.push(cell.trim().replace(/^"|"$/g, ''));
+      return result;
+    }
+
+    function safeParse(val) {
+      if (!val) return 0;
+      const parsed = parseInt(val.toString().trim(), 10);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+
+    function isToday(timestampStr) {
+      if (!timestampStr) return false;
+      const parsedDate = new Date(timestampStr);
+      if (isNaN(parsedDate.getTime())) return false;
+      const today = new Date();
+      return parsedDate.getFullYear() === today.getFullYear() &&
+             parsedDate.getMonth() === today.getMonth() &&
+             parsedDate.getDate() === today.getDate();
+    }
+
+    function findColumnIndex(headers, keywords) {
+      return headers.findIndex(h => keywords.some(k => h.toLowerCase().includes(k.toLowerCase())));
+    }
+
+    // -------------------------------------------------------------
+    // SOLUTION 1: DEDUPLICATE BY STATION (LATEST SUBMISSION WINS)
+    // -------------------------------------------------------------
+    function deduplicateLatestSubmissions(headers, rows) {
+      const stationIdx = findColumnIndex(headers, ["station"]);
+      const timestampIdx = 0; // Column A is Timestamp
+
+      if (stationIdx === -1) return rows;
+
+      const latestByStationMap = new Map();
+
+      rows.forEach(row => {
+        const stationName = (row[stationIdx] || '').trim().toUpperCase();
+        if (!stationName) return;
+
+        const rowTime = new Date(row[timestampIdx]).getTime();
+
+        if (!latestByStationMap.has(stationName)) {
+          latestByStationMap.set(stationName, { row, time: rowTime });
+        } else {
+          const stored = latestByStationMap.get(stationName);
+          // If this row has a newer timestamp (or timestamp parse failed), overwrite
+          if (isNaN(rowTime) || rowTime >= stored.time) {
+            latestByStationMap.set(stationName, { row, time: rowTime });
+          }
+        }
+      });
+
+      return Array.from(latestByStationMap.values()).map(item => item.row);
+    }
+
+    function cleanAndConsolidateData(rawHeaders, rawRows) {
+      const stationIndices = [];
+      const excludeIndices = [];
+      
+      rawHeaders.forEach((h, idx) => {
+        const lower = h.toLowerCase();
+        
+        if (lower.includes("select station") || lower === "station") {
+          stationIndices.push(idx);
+        }
+        
+        if (lower.includes("upload") || lower.includes("application leave") || lower.includes("signed") || lower.includes("appointment")) {
+          excludeIndices.push(idx);
+        }
+      });
+
+      const cleanHeaders = [];
+      const indexMapping = [];
+      let stationMerged = false;
+
+      rawHeaders.forEach((h, idx) => {
+        if (excludeIndices.includes(idx)) return;
+
+        if (stationIndices.includes(idx)) {
+          if (!stationMerged) {
+            cleanHeaders.push("SELECT STATION");
+            indexMapping.push(stationIndices);
+            stationMerged = true;
+          }
+        } else {
+          cleanHeaders.push(h);
+          indexMapping.push([idx]);
+        }
+      });
+
+      const cleanRows = rawRows.map(row => {
+        return indexMapping.map(mapArray => {
+          for (let colIdx of mapArray) {
+            const val = row[colIdx] ? row[colIdx].trim() : '';
+            if (val !== '') return val;
+          }
+          return '';
+        });
+      });
+
+      return { cleanHeaders, cleanRows };
+    }
+
+    async function loadDashboardData() {
+      const config = SECTION_CONFIGS[currentSectionKey];
+      if (!config) return;
+      
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${config.sheetId}/export?format=csv&gid=${config.gid}`;
+
+      try {
+        const response = await fetch(csvUrl);
+        const textData = await response.text();
+        const lines = textData.split(/\r?\n/).filter(line => line.trim() !== "");
+        if (lines.length === 0) return;
+
+        const allParsedRows = lines.map(line => parseCsvLine(line));
+        globalHeaders = allParsedRows[0];
+        const dataRows = allParsedRows.slice(1).filter(r => r.length > 1 && r[0] && r[0].trim() !== "" && !r[0].toLowerCase().includes("timestamp"));
+
+        // 1. Filter for today's submissions
+        const todayRows = dataRows.filter(row => isToday(row[0]));
+        const candidateRows = todayRows.length > 0 ? todayRows : dataRows;
+
+        // 2. Clean and merge columns
+        const cleaned = cleanAndConsolidateData(globalHeaders, candidateRows);
+        processedHeaders = cleaned.cleanHeaders;
+        
+        // 3. Deduplicate: Keep only the latest entry per station for today
+        processedRows = deduplicateLatestSubmissions(processedHeaders, cleaned.cleanRows);
+
+        populateStationDropdown(processedHeaders, processedRows);
+        applyCombinedFilters();
+
+        document.getElementById("lastSyncTime").textContent = new Date().toLocaleTimeString();
+      } catch (error) {
+        console.error("Error fetching sheet:", error);
+      }
+    }
+
+    function populateStationDropdown(headers, rows) {
+      const select = document.getElementById("stationFilter");
+      const currentSelected = select.value;
+      
+      const stationIdx = findColumnIndex(headers, ["station"]);
+      const provIdx = findColumnIndex(headers, ["province"]);
+
+      if (stationIdx === -1) return;
+
+      const stationsSet = new Set();
+      rows.forEach(r => {
+        const province = provIdx !== -1 ? (r[provIdx] || '').toLowerCase() : '';
+        const stationName = (r[stationIdx] || '').trim();
+
+        if (currentProvinceFilter === 'ALL' || province.includes(currentProvinceFilter)) {
+          if (stationName) stationsSet.add(stationName);
+        }
+      });
+
+      let optionsHtml = '<option value="ALL">ALL STATIONS</option>';
+      Array.from(stationsSet).sort().forEach(st => {
+        const isSelected = st === currentSelected ? 'selected' : '';
+        optionsHtml += `<option value="${st}" ${isSelected}>${st}</option>`;
+      });
+
+      select.innerHTML = optionsHtml;
+    }
+
+    function applyCombinedFilters() {
+      const selectedStation = document.getElementById("stationFilter").value;
+      const stationIdx = findColumnIndex(processedHeaders, ["station"]);
+      const provIdx = findColumnIndex(processedHeaders, ["province"]);
+
+      let filteredRows = processedRows;
+
+      if (currentProvinceFilter !== 'ALL' && provIdx !== -1) {
+        filteredRows = filteredRows.filter(r => (r[provIdx] || '').toLowerCase().includes(currentProvinceFilter));
+      }
+
+      if (selectedStation !== "ALL" && stationIdx !== -1) {
+        filteredRows = filteredRows.filter(r => (r[stationIdx] || '').trim() === selectedStation);
+      }
+
+      updateDynamicWidgets(processedHeaders, filteredRows);
+      checkCriticalOperationalAlerts(processedHeaders, filteredRows);
+      renderDynamicMainTable(processedHeaders, filteredRows);
+    }
+
+    // -------------------------------------------------------------
+    // CRITICAL OPERATIONAL ALERT CHECKER WITH STATION DRILLDOWN
+    // -------------------------------------------------------------
+    function checkCriticalOperationalAlerts(headers, dataRows) {
+      const totalIdx = findColumnIndex(headers, ["total truck", "total trucks"]);
+      const unservIdx = findColumnIndex(headers, ["unserviceable"]);
+      const actualIdx = findColumnIndex(headers, ["actual operational", "actual"]);
+      const stationIdx = findColumnIndex(headers, ["station"]);
+
+      const alertBanner = document.getElementById("criticalAlertBanner");
+      const alertMsg = document.getElementById("criticalAlertMessage");
+      const alertBadge = document.getElementById("alertStationCountBadge");
+      const stationsContainer = document.getElementById("criticalStationsContainer");
+
+      stationsContainer.innerHTML = "";
+
+      const criticalStations = [];
+
+      dataRows.forEach(row => {
+        const stationName = stationIdx !== -1 ? (row[stationIdx] || 'UNKNOWN STATION').trim() : 'UNKNOWN STATION';
+        const total = totalIdx !== -1 ? safeParse(row[totalIdx]) : 0;
+        const unserv = unservIdx !== -1 ? safeParse(row[unservIdx]) : 0;
+        const actual = actualIdx !== -1 ? safeParse(row[actualIdx]) : 0;
+
+        let reason = "";
+
+        if (actual < 1) {
+          reason = "Zero (0) Operational Trucks";
+        } else if (total > 0 && unserv >= total) {
+          reason = `100% Unserviceable (${unserv}/${total})`;
+        }
+
+        if (reason && stationName) {
+          criticalStations.push({ stationName, reason });
+        }
+      });
+
+      if (criticalStations.length > 0) {
+        alertMsg.textContent = `The following station(s) are reporting CRITICAL FLEET DEFICITS under current filter window (${currentProvinceFilter.toUpperCase()}):`;
+        alertBadge.textContent = `${criticalStations.length} STATION(S) AFFECTED`;
+
+        criticalStations.forEach(item => {
+          const badge = document.createElement("div");
+          badge.className = "bg-rose-900/90 border border-rose-500 text-rose-100 px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-2 shadow-sm";
+          badge.innerHTML = `
+            <span>📍 ${item.stationName}</span>
+            <span class="bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded uppercase font-sans">${item.reason}</span>
+          `;
+          stationsContainer.appendChild(badge);
+        });
+
+        alertBanner.classList.remove("hidden");
+      } else {
+        alertBanner.classList.add("hidden");
+      }
+    }
+
+    function getMetricColorClass(label) {
+      const lower = label.toLowerCase();
+      if (lower.includes("unserv")) return "text-rose-500 drop-shadow-[0_0_12px_rgba(244,63,94,0.3)]";
+      if (lower.includes("actual") || lower.includes("duty")) return "text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.3)]";
+      if (lower.includes("leave")) return "text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.3)]";
+      if (lower.includes("truck") || lower.includes("total")) return "text-blue-400 drop-shadow-[0_0_12px_rgba(96,165,250,0.3)]";
+      return "text-slate-100";
+    }
+
+    function updateDynamicWidgets(headers, dataRows) {
+      const container = document.getElementById("hudWidgetsContainer");
+      container.innerHTML = "";
+
+      const numericIndices = [];
+      headers.forEach((header, index) => {
+        const lower = header.toLowerCase();
+        if (!lower.includes("timestamp") && !lower.includes("rank") && !lower.includes("name") && !lower.includes("province") && !lower.includes("station") && !lower.includes("appointment")) {
+          numericIndices.push(index);
+        }
+      });
+
+      numericIndices.slice(0, 6).forEach(colIndex => {
+        const label = headers[colIndex] || `METRIC ${colIndex}`;
+        const sum = dataRows.reduce((acc, row) => acc + safeParse(row[colIndex]), 0);
+        const colorClass = getMetricColorClass(label);
+
+        const card = document.createElement("div");
+        card.className = "bg-gradient-to-b from-slate-900/90 to-slate-900/50 border border-slate-800 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:border-slate-700 transition-all duration-300 flex flex-col justify-between group min-h-[150px]";
+        card.innerHTML = `
+          <span class="text-xs md:text-sm font-extrabold text-slate-300 uppercase tracking-wide block leading-snug group-hover:text-white transition-colors">
+            ${label}
+          </span>
+          <div class="text-5xl lg:text-6xl font-black ${colorClass} font-mono tracking-tight mt-3">
+            ${sum.toLocaleString()}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderDynamicMainTable(headers, rows) {
+      const tableHead = document.getElementById("mainTableHead");
+      const tableBody = document.getElementById("mainTableBody");
+
+      let headHtml = '<tr class="text-slate-400 text-xs uppercase border-b border-slate-800/80 bg-slate-950/40">';
+      headers.forEach(h => { headHtml += `<th class="p-3.5 font-bold">${h || 'FIELD'}</th>`; });
+      headHtml += '</tr>';
+      tableHead.innerHTML = headHtml;
+
+      if (rows.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="${headers.length}" class="p-6 text-center text-slate-500 font-medium">No records found matching current filters.</td></tr>`;
+        return;
+      }
+
+      let bodyHtml = "";
+      rows.forEach(row => {
+        bodyHtml += `<tr class="hover:bg-slate-800/40 transition-colors">`;
+        headers.forEach((_, cIndex) => {
+          const val = row[cIndex] || '0';
+          let style = "text-slate-300";
+          if (cIndex === 0) style = "text-slate-400";
+          if (cIndex === 1) style = "text-white font-bold";
+          bodyHtml += `<td class="p-3.5 ${style}">${val}</td>`;
+        });
+        bodyHtml += '</tr>';
+      });
+      tableBody.innerHTML = bodyHtml;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadDashboardData();
+      setInterval(loadDashboardData, 10000);
+
+      document.getElementById("stationFilter").addEventListener("change", applyCombinedFilters);
+
+      document.querySelectorAll('.prov-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.prov-btn').forEach(b => {
+            b.classList.remove('bg-rose-600', 'text-white', 'shadow-md', 'shadow-rose-600/30');
+            b.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-slate-800/80');
+          });
+
+          const activeBtn = e.currentTarget;
+          activeBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800/80');
+          activeBtn.classList.add('bg-rose-600', 'text-white', 'shadow-md', 'shadow-rose-600/30');
+
+          currentProvinceFilter = activeBtn.getAttribute('data-province');
+          
+          populateStationDropdown(processedHeaders, processedRows);
+          document.getElementById("stationFilter").value = "ALL";
+          applyCombinedFilters();
+        });
+      });
+
+      document.querySelectorAll('.section-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+          document.querySelectorAll('.section-btn').forEach(btn => {
+            btn.classList.remove('bg-slate-800', 'border-l-4', 'border-rose-500', 'text-white', 'shadow-md', 'active');
+            btn.classList.add('text-slate-300');
+          });
+
+          const activeBtn = e.currentTarget;
+          activeBtn.classList.add('bg-slate-800', 'border-l-4', 'border-rose-500', 'text-white', 'shadow-md', 'active');
+          
+          currentSectionKey = activeBtn.getAttribute('data-section');
+          const config = SECTION_CONFIGS[currentSectionKey];
+          if (config) {
+            document.getElementById('hudTitle').innerHTML = `<span class="text-lg">🔥</span> ${config.title.toUpperCase()} — SUMMARY MATRIX`;
+            document.getElementById('tableMainTitle').textContent = `Live Google Sheets ${config.title} Table`;
+            loadDashboardData();
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
