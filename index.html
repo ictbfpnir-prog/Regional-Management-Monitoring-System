@@ -10,6 +10,25 @@
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    @keyframes slideDown {
+      from { transform: translateY(-40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes slideUpFade {
+      from { transform: translateY(0); opacity: 1; max-height: 400px; margin-bottom: 2rem; }
+      to { transform: translateY(-30px); opacity: 0; max-height: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; border-width: 0; }
+    }
+    @keyframes megaPulseGlow {
+      0%, 100% { box-shadow: 0 0 30px rgba(244, 63, 94, 0.7), inset 0 0 20px rgba(244, 63, 94, 0.5); }
+      50% { box-shadow: 0 0 90px rgba(244, 63, 94, 1), inset 0 0 40px rgba(244, 63, 94, 0.8); }
+    }
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .mega-alert-banner { animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards, megaPulseGlow 1.5s infinite; }
+    .top-banner-exit { animation: slideUpFade 0.6s ease-in-out forwards; overflow: hidden; }
+    .floating-art { animation: floatSlow 3s ease-in-out infinite; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
@@ -26,7 +45,7 @@
       </div>
     </div>
 
-    <!-- ENHANCED STYLIZED DATE & TIME DISPLAY -->
+    <!-- STYLIZED DATE & TIME DISPLAY -->
     <div class="flex items-center gap-3 bg-slate-950 border border-slate-800/90 px-5 py-2.5 rounded-2xl shadow-xl shadow-slate-950/60 ring-1 ring-slate-800">
       <div class="flex items-center gap-2">
         <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
@@ -40,88 +59,173 @@
   <!-- MAIN CONTAINER LAYOUT -->
   <div class="flex flex-1 overflow-hidden">
 
-    <!-- SIDEBAR -->
-    <aside class="w-72 bg-slate-900/60 border-r border-slate-800 p-4 flex flex-col justify-between">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="w-80 bg-slate-900/80 backdrop-blur-md border-r border-slate-800/90 p-5 flex flex-col justify-between shadow-2xl z-10">
       <div>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">NIR Staff Sections</h2>
-          <button class="text-emerald-400 hover:text-emerald-300 text-sm font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">+</button>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xs font-black text-rose-500 uppercase tracking-widest flex items-center gap-1.5">
+            <span>📋</span> NIR STAFF SECTIONS
+          </h2>
+          <button class="text-emerald-400 hover:text-white text-sm font-bold bg-emerald-500/20 hover:bg-emerald-500/40 px-2.5 py-1 rounded-lg border border-emerald-500/30 transition-all duration-200 shadow-sm">
+            +
+          </button>
         </div>
-        <p class="text-xs text-slate-500 mb-4">Select a ledger to update records</p>
+        <p class="text-xs text-slate-400 mb-5 font-medium">Select a section to switch ledger view</p>
 
-        <nav class="space-y-1.5">
-          <button data-section="fire-ops" class="section-btn w-full flex items-center justify-between p-3.5 rounded-xl text-white bg-slate-800 border-l-4 border-rose-500 shadow-md transition active">
-            <span class="flex items-center gap-3 font-semibold text-sm"><span>🔥</span> Fire Operations Center</span>
-            <span class="bg-slate-700/80 px-2.5 py-0.5 rounded-md text-xs text-slate-200 font-mono">5</span>
+        <!-- NAV BUTTONS -->
+        <nav class="space-y-2.5">
+          <button data-section="active-dispatches" class="section-btn w-full flex items-center justify-between p-4 rounded-xl text-white bg-gradient-to-r from-rose-950/80 via-slate-800 to-slate-800/90 border-l-4 border-rose-500 border-y border-r border-slate-700/60 shadow-lg shadow-rose-950/40 transition-all duration-300 transform active scale-[1.01]">
+            <span class="flex items-center gap-3.5 font-bold text-base tracking-wide">
+              <span class="text-xl">🎯</span> Active Responses/Dispatch
+            </span>
+            <span class="bg-rose-600/30 text-rose-200 border border-rose-500/40 px-2.5 py-1 rounded-md text-xs font-mono font-bold shadow-inner">LIVE</span>
           </button>
-          <button data-section="admin-hr" class="section-btn w-full flex items-center justify-between p-3.5 rounded-xl text-slate-300 hover:bg-slate-800/60 transition">
-            <span class="flex items-center gap-3 font-medium text-sm"><span>👤</span> Administrative & HR</span>
-            <span class="bg-slate-800 px-2.5 py-0.5 rounded-md text-xs text-slate-400 font-mono">5</span>
+
+          <button data-section="fire-ops" class="section-btn w-full flex items-center justify-between p-4 rounded-xl text-slate-300 border border-slate-800/80 hover:border-rose-500/40 hover:bg-slate-800/70 hover:text-white hover:translate-x-1.5 transition-all duration-300 group">
+            <span class="flex items-center gap-3.5 font-bold text-base tracking-wide group-hover:text-rose-300 transition-colors">
+              <span class="text-xl opacity-80 group-hover:opacity-100 transition-opacity">📊</span> Operational Status
+            </span>
+        <span class="bg-apple-green-600/30 text-rose-200 border border-green-500/40 px-2.5 py-1 rounded-md text-xs font-mono font-bold shadow-inner">DAILY</span>
           </button>
-          <button data-section="logistics" class="section-btn w-full flex items-center justify-between p-3.5 rounded-xl text-slate-300 hover:bg-slate-800/60 transition">
-            <span class="flex items-center gap-3 font-medium text-sm"><span>🔧</span> Logistics & Infrastructure</span>
-            <span class="bg-slate-800 px-2.5 py-0.5 rounded-md text-xs text-slate-400 font-mono">5</span>
+
+          <button data-section="logistics" class="section-btn w-full flex items-center justify-between p-4 rounded-xl text-slate-300 border border-slate-800/80 hover:border-rose-500/40 hover:bg-slate-800/70 hover:text-white hover:translate-x-1.5 transition-all duration-300 group">
+            <span class="flex items-center gap-3.5 font-bold text-base tracking-wide group-hover:text-rose-300 transition-colors">
+              <span class="text-xl opacity-80 group-hover:opacity-100 transition-opacity">🔧</span> Logistics & Infrastructure
+            </span>
+            <span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold">SOON</span>
           </button>
-          <button data-section="fses" class="section-btn w-full flex items-center justify-between p-3.5 rounded-xl text-slate-300 hover:bg-slate-800/60 transition">
-            <span class="flex items-center gap-3 font-medium text-sm"><span>📜</span> Fire Safety Enforcement</span>
-            <span class="bg-slate-800 px-2.5 py-0.5 rounded-md text-xs text-slate-400 font-mono">5</span>
+
+          <button data-section="fses" class="section-btn w-full flex items-center justify-between p-4 rounded-xl text-slate-300 border border-slate-800/80 hover:border-rose-500/40 hover:bg-slate-800/70 hover:text-white hover:translate-x-1.5 transition-all duration-300 group">
+            <span class="flex items-center gap-3.5 font-bold text-base tracking-wide group-hover:text-rose-300 transition-colors">
+              <span class="text-xl opacity-80 group-hover:opacity-100 transition-opacity">📜</span> Fire Safety Enforcement
+            </span>
+            <span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold">SOON</span>
           </button>
-          <button data-section="ict" class="section-btn w-full flex items-center justify-between p-3.5 rounded-xl text-slate-300 hover:bg-slate-800/60 transition">
-            <span class="flex items-center gap-3 font-medium text-sm"><span>📡</span> ICT & Cyber Operations</span>
-            <span class="bg-slate-800 px-2.5 py-0.5 rounded-md text-xs text-slate-400 font-mono">4</span>
+
+          <button data-section="ict" class="section-btn w-full flex items-center justify-between p-4 rounded-xl text-slate-300 border border-slate-800/80 hover:border-rose-500/40 hover:bg-slate-800/70 hover:text-white hover:translate-x-1.5 transition-all duration-300 group">
+            <span class="flex items-center gap-3.5 font-bold text-base tracking-wide group-hover:text-rose-300 transition-colors">
+              <span class="text-xl opacity-80 group-hover:opacity-100 transition-opacity">📡</span> ICT & Cyber Operations
+            </span>
+            <span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold">SOON</span>
           </button>
-          <button data-section="finance" class="section-btn w-full flex items-center justify-between p-3.5 rounded-xl text-slate-300 hover:bg-slate-800/60 transition">
-            <span class="flex items-center gap-3 font-medium text-sm"><span>💰</span> Finance & Budget Section</span>
-            <span class="bg-slate-800 px-2.5 py-0.5 rounded-md text-xs text-slate-400 font-mono">4</span>
+
+          <button data-section="finance" class="section-btn w-full flex items-center justify-between p-4 rounded-xl text-slate-300 border border-slate-800/80 hover:border-rose-500/40 hover:bg-slate-800/70 hover:text-white hover:translate-x-1.5 transition-all duration-300 group">
+            <span class="flex items-center gap-3.5 font-bold text-base tracking-wide group-hover:text-rose-300 transition-colors">
+              <span class="text-xl opacity-80 group-hover:opacity-100 transition-opacity">💰</span> Finance & Budget Section
+            </span>
+            <span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold">SOON</span>
           </button>
         </nav>
       </div>
 
-      <div class="pt-4 border-t border-slate-800">
-        <span class="text-[11px] text-slate-500 uppercase tracking-wider block mb-1">Projection Sync Status</span>
-        <p class="text-xs text-emerald-400 flex items-center gap-1.5 font-medium">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Hooks Active
+      <div class="pt-5 border-t border-slate-800/80">
+        <span class="text-xs text-slate-400 uppercase tracking-wider block font-bold mb-1">PROJECTION SYNC STATUS</span>
+        <p class="text-xs text-emerald-400 flex items-center gap-2 font-bold font-mono bg-emerald-950/40 border border-emerald-500/30 p-2.5 rounded-xl shadow-inner">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span> REAL-TIME MONITORING
         </p>
       </div>
     </aside>
 
-    <!-- MAIN DASHBOARD CONTENT AREA -->
+    <!-- MAIN DASHBOARD CONTENT -->
     <main class="flex-1 p-8 overflow-y-auto space-y-8">
 
-      <!-- CRITICAL ALERT NOTIFICATION BANNER -->
-      <div id="criticalAlertBanner" class="hidden bg-rose-950/90 border-2 border-rose-500 rounded-2xl p-5 shadow-2xl shadow-rose-950/50 backdrop-blur-md animate-pulse">
-        <div class="flex items-start gap-4">
-          <div class="bg-rose-600 p-3 rounded-xl text-white font-extrabold text-2xl flex-shrink-0 animate-bounce">
-            ⚠️
+      <!-- AUDIO PERMISSION OVERLAY BUTTON -->
+      <div id="audioUnlockBanner" class="bg-gradient-to-r from-rose-900 via-red-900 to-slate-900 border-2 border-rose-500 rounded-3xl p-5 shadow-2xl flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl animate-bounce">🔊</span>
+          <div>
+            <h4 class="text-white font-black text-sm md:text-base uppercase tracking-wider">Enable Emergency Siren Audio</h4>
+            <p class="text-xs text-rose-200 font-mono">Browsers block sound until clicked. Click to activate live emergency audio cues.</p>
           </div>
-          <div class="flex-1">
-            <div class="flex items-center justify-between">
-              <h3 class="text-rose-200 font-extrabold text-sm uppercase tracking-wider flex items-center gap-2">
-                <span>CRITICAL OPERATIONAL ALERT</span>
-                <span id="alertStationCountBadge" class="bg-rose-600 text-white text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold">0 STATIONS AFFECTED</span>
-              </h3>
-            </div>
-            
-            <p id="criticalAlertMessage" class="text-rose-100 text-xs font-semibold mt-1 leading-relaxed font-mono">
-              Analyzing operational readiness...
-            </p>
+        </div>
+        <button onclick="unlockAudioSystem()" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase font-mono tracking-widest shadow-lg shadow-rose-600/50 border border-rose-300 transition-all">
+          ENABLE AUDIO NOW
+        </button>
+      </div>
 
-            <div id="criticalStationsContainer" class="mt-3 flex flex-wrap gap-2">
-              <!-- Affected Station Badges appended here dynamically -->
+      <!-- ACTIVE DISPATCHES WIDGET CONTAINER -->
+      <div id="sectionWidgetContainer-active-dispatches" class="section-exclusive-widget">
+        <div id="newResponseAlertWidget" class="bg-slate-900/95 border-2 border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-xl transition-all duration-300 relative">
+          <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between border-b border-slate-800 pb-5 mb-6 gap-4">
+            <div class="flex items-center gap-4">
+              <span id="responseAlertIcon" class="text-4xl">⏳</span>
+              <div>
+                <h3 id="responseAlertTitle" class="text-white font-black text-lg md:text-xl tracking-wider uppercase drop-shadow">
+                  NEW RESPONSE ALERT — STANDBY FOR INCOMING DISPATCH
+                </h3>
+                <p id="responseAlertSub" class="text-sm text-slate-300 font-mono font-bold mt-1">MONITORING LIVE FEED FOR REAL-TIME EMERGENCY DISPATCHES...</p>
+              </div>
+            </div>
+            <span id="responseAlertTimerBadge" class="hidden bg-rose-600/30 text-rose-200 border-2 border-rose-500/50 px-5 py-2 rounded-2xl text-sm font-mono font-black animate-pulse shadow-lg shadow-rose-950/50">
+              AUTO-CLEAR IN 3:00
+            </span>
+          </div>
+
+          <div id="responseAlertContent" class="text-slate-300 text-base font-mono font-bold italic py-4">
+            NO RECENT EMERGENCY RESPONSE LOGGED YET. LIVE STREAM IS ACTIVE.
+          </div>
+        </div>
+      </div>
+
+      <!-- OPERATIONAL STATUS WIDGET CONTAINER -->
+      <div id="sectionWidgetContainer-fire-ops" class="section-exclusive-widget hidden">
+        <div id="criticalAlertBanner" class="mega-alert-banner bg-gradient-to-r from-red-950 via-rose-950 to-slate-900 border-4 border-rose-500 rounded-3xl p-8 shadow-2xl backdrop-blur-3xl relative">
+          <button onclick="dismissTopBanner()" class="absolute top-5 right-5 text-rose-200 hover:text-white bg-rose-900/60 hover:bg-rose-700 px-4 py-2 rounded-xl transition-colors text-xs font-black font-mono border border-rose-400/50 shadow-md">
+            ✕ DISMISS ALERT
+          </button>
+          <div class="flex flex-col lg:flex-row items-start lg:items-center gap-6 pr-16">
+            <div class="bg-gradient-to-br from-rose-600 to-red-700 p-6 rounded-3xl text-white font-extrabold text-5xl flex-shrink-0 shadow-2xl shadow-rose-600/70 animate-bounce border-2 border-rose-300">
+              🚨
+            </div>
+            <div class="flex-1">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                <h3 class="text-white font-black text-2xl md:text-3xl tracking-wider flex items-center gap-3 drop-shadow-lg">
+                  <span>CRITICAL FLEET READINESS DEFICIT</span>
+                  <span id="alertStationCountBadge" class="bg-rose-600 text-white text-sm md:text-base px-5 py-2 rounded-full font-mono font-black shadow-xl shadow-rose-600/60 border-2 border-rose-300">0 STATIONS AFFECTED</span>
+                </h3>
+              </div>
+              <p id="criticalAlertMessage" class="text-rose-100 text-base md:text-lg font-bold leading-relaxed font-mono drop-shadow">
+                Analyzing operational readiness across regional sectors...
+              </p>
+              <div id="criticalStationsContainer" class="mt-5 flex flex-wrap gap-4"></div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- CONTROL BAR & SUMMARY MATRIX SECTION -->
-      <section class="space-y-5">
-        <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-xl backdrop-blur-sm">
+      <!-- GENERIC UNDER CONSTRUCTION WIDGET CONTAINER FOR OTHER SECTIONS -->
+      <div id="sectionWidgetContainer-generic" class="section-exclusive-widget hidden">
+        <div class="bg-gradient-to-br from-slate-900 via-slate-900/90 to-amber-950/20 border-2 border-amber-500/40 rounded-3xl p-10 shadow-2xl text-center relative overflow-hidden">
+          <div class="absolute -right-10 -bottom-10 text-9xl opacity-5 pointer-events-none select-none">🚧</div>
+          <div class="max-w-xl mx-auto space-y-4">
+            <div class="w-20 h-20 bg-amber-500/20 border-2 border-amber-500/50 rounded-2xl mx-auto flex items-center justify-center text-4xl floating-art shadow-lg shadow-amber-500/20">
+              🏗️
+            </div>
+            <h3 class="text-xl md:text-2xl font-black text-white uppercase tracking-wider">MODULE CURRENTLY UNDER DEVELOPMENT</h3>
+            <p id="constructionSubtitle" class="text-sm text-slate-300 font-mono">
+              This regional bureau staff section module is currently being built and integrated into the monitoring framework. Full telemetry streams will go live soon.
+            </p>
+            <div class="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-4 py-2 rounded-xl text-amber-300 text-xs font-mono font-bold mt-2">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> SCHEDULED FOR DEPLOYMENT Q3/Q4
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION: SUMMARY MATRIX -->
+      <section class="space-y-6">
+        
+        <!-- ISOLATED SECTION HUD WIDGETS CONTAINER -->
+        <div id="hudWidgetsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5"></div>
+
+        <!-- CONTROL & FILTER TAB -->
+        <div id="controlFilterTabContainer" class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-xl backdrop-blur-sm">
           
           <h2 id="hudTitle" class="text-sm font-extrabold text-slate-200 uppercase tracking-widest flex items-center gap-2.5">
-            <span class="text-lg">🔥</span> FIRE OPERATIONS CENTER — SUMMARY MATRIX
+            <span class="text-lg">🎯</span> ACTIVE RESPONSES/DISPATCH — LIVE STREAM FEED
           </h2>
 
-          <div class="flex flex-wrap items-center gap-3.5 w-full xl:w-auto">
+          <div id="filterControlsRight" class="flex flex-wrap items-center gap-3.5 w-full xl:w-auto">
             
             <!-- PROVINCE FILTER BUTTONS -->
             <div class="flex items-center gap-1 bg-slate-950 p-1.5 rounded-xl border border-slate-800/80 shadow-inner">
@@ -147,41 +251,30 @@
               </select>
             </div>
 
-            <!-- UNSERVICEABLE ONLY TOGGLE BUTTON -->
-            <button id="unserviceableToggleBtn" class="bg-slate-900 hover:bg-rose-950/60 border border-slate-700 text-slate-300 hover:text-rose-400 text-xs font-bold px-3.5 py-2 rounded-xl transition duration-200 flex items-center gap-1.5 shadow-sm">
-              <span>🚨</span>
-              <span>Show Unserviceable</span>
-            </button>
-
             <span class="text-xs text-emerald-400 font-mono font-semibold bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/20 whitespace-nowrap shadow-sm">
-              ⚡ REAL-TIME SYNC
+              ⚡ LIVE POLLING ACTIVE
             </span>
           </div>
-        </div>
-
-        <!-- DYNAMIC SUMMARY WIDGETS -->
-        <div id="hudWidgetsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
-          <!-- Dynamically populated metric cards -->
         </div>
       </section>
 
       <!-- LIVE GOOGLE SHEET TABLE -->
-      <div class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-6 shadow-2xl backdrop-blur-sm">
+      <div id="mainTableCardContainer" class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-6 shadow-2xl backdrop-blur-sm">
         <div class="flex items-center justify-between mb-5 border-b border-slate-800/80 pb-4">
           <div class="flex items-center gap-2.5">
             <span class="text-rose-500 text-xl">🗃️</span>
             <h2 id="tableMainTitle" class="text-rose-500 font-extrabold text-sm tracking-wider uppercase">
-              Live Google Sheets Operations Table
+              Live Google Sheets Active Responses/Dispatch Table (Today's Feed)
             </h2>
           </div>
-          <span class="text-xs text-slate-500 font-mono">Real-time sync active</span>
+          <span class="text-xs text-slate-500 font-mono">Showing today's responses & counted in daily totals</span>
         </div>
 
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm border-collapse">
             <thead id="mainTableHead"></thead>
             <tbody id="mainTableBody" class="divide-y divide-slate-800/60 font-mono text-xs">
-              <tr><td colspan="10" class="p-6 text-center text-slate-500">Loading live data...</td></tr>
+              <tr><td colspan="10" class="p-6 text-center text-slate-500">Loading stream data...</td></tr>
             </tbody>
           </table>
         </div>
@@ -191,39 +284,361 @@
   </div>
 
   <script>
-    const SECTION_CONFIGS = {
-      'fire-ops': { sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc', gid: '298294760', title: 'Fire Operations Center' },
-      'admin-hr': { sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc', gid: '0', title: 'Administrative & HR' },
-      'logistics': { sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc', gid: '0', title: 'Logistics & Infrastructure' },
-      'fses': { sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc', gid: '0', title: 'Fire Safety Enforcement' },
-      'ict': { sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc', gid: '0', title: 'ICT & Cyber Operations' },
-      'finance': { sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc', gid: '0', title: 'Finance & Budget Section' }
+    // =========================================================================
+    // MODULAR ARCHITECTURE: EACH SECTION HAS ITS OWN FULLY ISOLATED CONTROLLER
+    // =========================================================================
+
+    const SECTIONS = {
+      
+      // --- 1. ACTIVE DISPATCHES SECTION ---
+      'active-dispatches': {
+        sheetId: '1RMjRC23wxNLC7YnqA5zHmEz_MW1dLnPwRaNG3n_AZ1M',
+        gid: '1764577514',
+        title: 'Active Responses/Dispatch',
+        icon: '🎯',
+        isUnderConstruction: false,
+        
+        cleanData: function(rawHeaders, rawRows) {
+          const provIndices = [];
+          const stationIndices = [];
+          const medIdx = findColumnIndex(rawHeaders, ["type of medical response"]);
+          const rescueIdx = findColumnIndex(rawHeaders, ["type of rescue"]);
+          const fireIdx = findColumnIndex(rawHeaders, ["nature of fire"]);
+          const excludeIndices = [];
+
+          rawHeaders.forEach((h, idx) => {
+            const lower = h.toLowerCase().trim();
+            if (lower.includes("province") || lower.includes("select province")) provIndices.push(idx);
+            if (lower.includes("select station") || lower === "station") stationIndices.push(idx);
+            if (lower.includes("upload") || lower.includes("file") || lower.includes("image") || lower.includes("photo")) excludeIndices.push(idx);
+            if (lower === "status" || lower.includes("column 12") || (idx > fireIdx && fireIdx !== -1)) excludeIndices.push(idx);
+          });
+
+          const cleanHeaders = [];
+          const indexMapping = [];
+          let provMerged = false, stationMerged = false, responseMerged = false;
+
+          rawHeaders.forEach((h, idx) => {
+            if (excludeIndices.includes(idx)) return;
+            if (provIndices.includes(idx)) {
+              if (!provMerged) { cleanHeaders.push("PROVINCE"); indexMapping.push(provIndices); provMerged = true; }
+            } else if (stationIndices.includes(idx)) {
+              if (!stationMerged) { cleanHeaders.push("STATION"); indexMapping.push(stationIndices); stationMerged = true; }
+            } else if (idx === medIdx || idx === rescueIdx || idx === fireIdx) {
+              if (!responseMerged) { cleanHeaders.push("Details"); indexMapping.push([medIdx, rescueIdx, fireIdx].filter(i => i !== -1)); responseMerged = true; }
+            } else {
+              let headerName = h;
+              if (headerName.toLowerCase().includes("rank | name")) headerName = "Commel";
+              cleanHeaders.push(headerName);
+              indexMapping.push([idx]);
+            }
+          });
+
+          const mappedRows = rawRows.map(row => indexMapping.map(mapArray => {
+            for (let colIdx of mapArray) {
+              const val = row[colIdx] ? row[colIdx].trim() : '';
+              if (val !== '') return val;
+            }
+            return '';
+          }));
+
+          const validColumnIndices = [];
+          cleanHeaders.forEach((header, colIdx) => {
+            const lowerHead = header.toLowerCase();
+            if (colIdx === 0 || lowerHead.includes('station') || lowerHead.includes('province') || lowerHead.includes('details') || lowerHead.includes('commel') || mappedRows.some(row => row[colIdx] && row[colIdx] !== '' && row[colIdx] !== '—')) {
+              validColumnIndices.push(colIdx);
+            }
+          });
+
+          return { 
+            cleanHeaders: validColumnIndices.map(idx => cleanHeaders[idx]), 
+            cleanRows: mappedRows.map(row => validColumnIndices.map(idx => row[idx])) 
+          };
+        },
+
+        filterRows: function(rows, headers) {
+          return rows.filter(r => isToday(r[0]));
+        },
+
+        renderWidgets: function(headers, dataRows) {
+          let fireTotal = 0, medicalTotal = 0, rescueTotal = 0;
+          dataRows.forEach(row => {
+            const fullRowStr = row.join(" ").toLowerCase();
+            if (fullRowStr.includes("fire")) fireTotal++;
+            else if (fullRowStr.includes("medical") || fullRowStr.includes("ems") || fullRowStr.includes("ambulance")) medicalTotal++;
+            else if (fullRowStr.includes("rescue") || fullRowStr.includes("vehicular") || fullRowStr.includes("sart")) rescueTotal++;
+          });
+
+          return [
+            { label: "🔥 FIRE RESPONSES", count: fireTotal.toLocaleString(), color: "text-orange-400", border: "border-orange-500/50", bg: "from-orange-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(249,115,22,0.4)]" },
+            { label: "🚑 MEDICAL RESPONSES", count: medicalTotal.toLocaleString(), color: "text-emerald-400", border: "border-emerald-500/50", bg: "from-emerald-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]" },
+            { label: "🛟 RESCUE RESPONSES", count: rescueTotal.toLocaleString(), color: "text-cyan-400", border: "border-cyan-500/50", bg: "from-cyan-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]" },
+            { label: "📊 TOTAL RESPONSES", count: dataRows.length.toLocaleString(), color: "text-rose-400", border: "border-rose-500/70", bg: "from-rose-950/50 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(244,63,94,0.5)]" }
+          ];
+        },
+
+        onLiveFeedUpdate: function(row, headers) {
+          playShortAudioAlert();
+          const widget = document.getElementById("newResponseAlertWidget");
+          const alertIcon = document.getElementById("responseAlertIcon");
+          const alertTitle = document.getElementById("responseAlertTitle");
+          const alertSub = document.getElementById("responseAlertSub");
+          const alertTimerBadge = document.getElementById("responseAlertTimerBadge");
+          const alertContent = document.getElementById("responseAlertContent");
+
+          widget.className = "bg-gradient-to-r from-red-950 via-rose-950 to-slate-950 border-4 border-rose-500 rounded-3xl p-8 shadow-2xl backdrop-blur-xl transition-all duration-300 relative shadow-[0_0_60px_rgba(244,63,94,0.5)]";
+          alertIcon.textContent = "🚨";
+          alertTitle.textContent = "NEW RESPONSE ALERT — ACTIVE DISPATCH";
+          alertSub.textContent = `REAL-TIME EMERGENCY SIGNAL CAPTURED AT ${row[0] ? row[0].toUpperCase() : 'JUST NOW'}`;
+          alertTimerBadge.classList.remove("hidden");
+
+          let detailsHtml = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pt-3">';
+          headers.forEach((h, idx) => {
+            const val = row[idx] ? row[idx].toUpperCase() : '—';
+            detailsHtml += `
+              <div class="bg-slate-950/90 border-2 border-rose-500/60 p-5 rounded-2xl shadow-xl">
+                <span class="text-xs font-black uppercase text-rose-300 tracking-wider block mb-1.5">${h.toUpperCase()}</span>
+                <span class="text-base md:text-lg font-black text-white font-mono break-words">${val}</span>
+              </div>
+            `;
+          });
+          detailsHtml += '</div>';
+          alertContent.innerHTML = detailsHtml;
+
+          if (responseWidgetClearTimeout) clearTimeout(responseWidgetClearTimeout);
+          if (responseWidgetInterval) clearInterval(responseWidgetInterval);
+
+          let timeLeft = 180;
+          responseWidgetInterval = setInterval(() => {
+            timeLeft--;
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            alertTimerBadge.textContent = `AUTO-CLEAR IN ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            if (timeLeft <= 0) clearInterval(responseWidgetInterval);
+          }, 1000);
+
+          responseWidgetClearTimeout = setTimeout(resetResponseAlertWidgetToBlank, 180000);
+        },
+
+        getWidgetContainerId: () => "sectionWidgetContainer-active-dispatches"
+      },
+
+      // --- 2. OPERATIONAL STATUS SECTION ---
+      'fire-ops': {
+        sheetId: '1zlifEhgkkUxNKpvR4t5-KoHU5lvwhtSrOXF8NuX4hKc',
+        gid: '298294760',
+        title: 'Operational Status',
+        icon: '📊',
+        isUnderConstruction: false,
+
+        cleanData: function(rawHeaders, rawRows) {
+          const provIndices = [];
+          const stationIndices = [];
+          const targetEndKeyword = "no. of on-duty personnel (admin/daily duty)";
+          let cutoffIndex = -1;
+
+          rawHeaders.forEach((h, idx) => {
+            const lower = h.toLowerCase().trim();
+            if (lower.includes("province") || lower.includes("select province")) provIndices.push(idx);
+            if (lower.includes("station") || lower.includes("select station") || lower === "unit") stationIndices.push(idx);
+            if (lower.includes(targetEndKeyword) || (lower.includes("on-duty personnel") && lower.includes("admin"))) {
+              if (cutoffIndex === -1) cutoffIndex = idx;
+            }
+          });
+
+          const maxIdx = cutoffIndex !== -1 ? cutoffIndex : rawHeaders.length - 1;
+
+          const cleanHeaders = [];
+          const indexMapping = [];
+          let provMerged = false, stationMerged = false;
+
+          for (let idx = 0; idx <= maxIdx; idx++) {
+            const h = rawHeaders[idx];
+            const lower = h.toLowerCase().trim();
+            
+            if (lower.includes("upload") || lower.includes("file") || lower.includes("image") || lower.includes("photo")) continue;
+
+            if (provIndices.includes(idx)) {
+              if (!provMerged) { cleanHeaders.push("PROVINCE"); indexMapping.push(provIndices); provMerged = true; }
+            } else if (stationIndices.includes(idx)) {
+              if (!stationMerged) { cleanHeaders.push("STATION"); indexMapping.push(stationIndices); stationMerged = true; }
+            } else {
+              let cleanName = h;
+              if (lower.includes(targetEndKeyword) || (lower.includes("on-duty personnel") && lower.includes("admin"))) {
+                cleanName = "NO. OF ON-DUTY PERSONNEL (ADMIN/DAILY DUTY)";
+              }
+              cleanHeaders.push(cleanName);
+              indexMapping.push([idx]);
+            }
+          }
+
+          const mappedRows = rawRows.map(row => indexMapping.map(mapArray => {
+            for (let colIdx of mapArray) {
+              const val = row[colIdx] ? row[colIdx].trim() : '';
+              if (val !== '') return val;
+            }
+            return '';
+          }));
+
+          return { cleanHeaders, cleanRows: mappedRows };
+        },
+
+        filterRows: function(rows, headers) {
+          return rows;
+        },
+
+        renderWidgets: function(headers, dataRows) {
+          const strengthIdx = findColumnIndex(headers, ["total strength of personnel", "include marshal"]);
+          const opsDutyIdx = findColumnIndex(headers, ["no. of on-duty personnel (operations)"]);
+          const adminDutyIdx = findColumnIndex(headers, ["no. of on-duty personnel (admin/daily duty)"]);
+          const totalTrucksIdx = findColumnIndex(headers, ["total truck", "total trucks"]);
+          const actualOpIdx = findColumnIndex(headers, ["actual operational", "actual"]);
+          const unserviceableIdx = findColumnIndex(headers, ["unserviceable"]);
+
+          let sumStrength = 0, sumOpsDuty = 0, sumAdminDuty = 0;
+          let sumTotalTrucks = 0, sumActualOp = 0, sumUnserviceable = 0;
+
+          dataRows.forEach(row => {
+            const strength = strengthIdx !== -1 ? safeParse(row[strengthIdx]) : 0;
+            const opsDuty = opsDutyIdx !== -1 ? safeParse(row[opsDutyIdx]) : 0;
+            const adminDuty = adminDutyIdx !== -1 ? safeParse(row[adminDutyIdx]) : 0;
+
+            sumStrength += strength;
+            sumOpsDuty += opsDuty;
+            sumAdminDuty += adminDuty;
+
+            sumTotalTrucks += totalTrucksIdx !== -1 ? safeParse(row[totalTrucksIdx]) : 0;
+            sumActualOp += actualOpIdx !== -1 ? safeParse(row[actualOpIdx]) : 0;
+            sumUnserviceable += unserviceableIdx !== -1 ? safeParse(row[unserviceableIdx]) : 0;
+          });
+
+          const totalPresentPersonnel = sumOpsDuty + sumAdminDuty;
+          const personnelAttendanceRate = sumStrength > 0 ? ((totalPresentPersonnel / sumStrength) * 100).toFixed(1) : "0.0";
+          const truckReadinessRate = sumTotalTrucks > 0 ? ((sumActualOp / sumTotalTrucks) * 100).toFixed(1) : "0.0";
+
+          const unserviceableCardBorder = stationsWithUnserviceableTabFilterActive ? "border-red-400 ring-2 ring-red-500" : "border-rose-500/70";
+          const unserviceableCardBg = stationsWithUnserviceableTabFilterActive ? "from-red-950 via-rose-950 to-slate-900" : "from-rose-950/50 via-slate-900/90 to-slate-950";
+
+          return [
+            { label: "🛡️ TOTAL STRENGTH (INC. MARSHAL)", count: sumStrength.toLocaleString(), color: "text-amber-400", border: "border-amber-500/50", bg: "from-amber-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(251,191,36,0.4)]", clickable: false },
+            { label: "🚨 ON-DUTY (OPERATIONS)", count: sumOpsDuty.toLocaleString(), color: "text-orange-400", border: "border-orange-500/50", bg: "from-orange-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(249,115,22,0.4)]", clickable: false },
+            { label: "📋 ON-DUTY (ADMIN/DAILY)", count: sumAdminDuty.toLocaleString(), color: "text-blue-400", border: "border-blue-500/50", bg: "from-blue-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(96,165,250,0.4)]", clickable: false },
+            { label: "👥 PERSONNEL ATTENDANCE", count: `${personnelAttendanceRate}%`, color: parseFloat(personnelAttendanceRate) >= 80 ? "text-emerald-400" : "text-amber-400", border: "border-indigo-500/50", bg: "from-indigo-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(129,140,248,0.4)]", clickable: false },
+            { label: "🏢 REPORTING STATIONS", count: dataRows.length.toLocaleString(), color: "text-sky-400", border: "border-sky-500/50", bg: "from-sky-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(56,189,248,0.4)]", clickable: false },
+
+            { label: "🚚 TOTAL FIRE TRUCKS", count: sumTotalTrucks.toLocaleString(), color: "text-teal-400", border: "border-teal-500/50", bg: "from-teal-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(45,212,191,0.4)]", clickable: false },
+            { 
+              label: stationsWithUnserviceableTabFilterActive ? "🛠️ UNSERVICEABLE TRUCKS (FILTERED ACTIVE)" : "🛠️ UNSERVICEABLE TRUCKS (CLICK TO FILTER)", 
+              count: sumUnserviceable.toLocaleString(), 
+              color: "text-rose-400", 
+              border: unserviceableCardBorder, 
+              bg: unserviceableCardBg, 
+              glow: "drop-shadow-[0_0_15px_rgba(244,63,94,0.5)]", 
+              pulse: sumUnserviceable > 0,
+              clickable: true,
+              action: "toggleUnserviceableFilter"
+            },
+            { label: "✅ SERVICEABLE TRUCKS", count: sumActualOp.toLocaleString(), color: "text-emerald-400", border: "border-emerald-500/50", bg: "from-emerald-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]", clickable: false },
+            { label: "📈 OPERATIONAL READINESS", count: `${truckReadinessRate}%`, color: parseFloat(truckReadinessRate) >= 80 ? "text-emerald-400" : "text-amber-400", border: "border-cyan-500/50", bg: "from-cyan-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]", clickable: false },
+            { label: "", count: "", color: "", border: "border-transparent", bg: "transparent", glow: "", clickable: false }
+          ];
+        },
+
+        onLiveFeedUpdate: function(headers, dataRows) {
+          checkCriticalOperationalAlerts(headers, dataRows);
+        },
+
+        getWidgetContainerId: () => "sectionWidgetContainer-fire-ops"
+      },
+
+      // --- 3. UNDER CONSTRUCTION SECTIONS ---
+      'logistics': createUnderConstructionConfig('Logistics & Infrastructure', '🔧', 'Logistics Inventory, Supply Chains, and Facilities Telemetry'),
+      'fses': createUnderConstructionConfig('Fire Safety Enforcement', '📜', 'Fire Clearance Tracking, Inspection Logs, and Code Compliance'),
+      'ict': createUnderConstructionConfig('ICT & Cyber Operations', '📡', 'Starlink Network Health, Node Latency, and Cyber Asset Security'),
+      'finance': createUnderConstructionConfig('Finance & Budget Section', '💰', 'Allotment Disbursements, Financial Ledger, and Sub-allotment Tracking')
     };
 
-    let currentSectionKey = 'fire-ops';
+    function createUnderConstructionConfig(title, icon, subtitleText) {
+      return {
+        title: title,
+        icon: icon,
+        isUnderConstruction: true,
+        cleanData: () => ({ cleanHeaders: [], cleanRows: [] }),
+        filterRows: () => [],
+        renderWidgets: () => [
+          { label: "🚧 DEVELOPMENT STATUS", count: "IN PROGRESS", color: "text-amber-400", border: "border-amber-500/50", bg: "from-amber-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(251,191,36,0.4)]", clickable: false },
+          { label: "📡 TELEMETRY STREAM", count: "OFFLINE", color: "text-slate-400", border: "border-slate-700/50", bg: "from-slate-900/30 via-slate-900/90 to-slate-950", glow: "", clickable: false }
+        ],
+        onLiveFeedUpdate: () => {},
+        getWidgetContainerId: () => "sectionWidgetContainer-generic"
+      };
+    }
+
+    let currentSectionKey = 'active-dispatches'; 
     let currentProvinceFilter = 'ALL';
-    let filterUnserviceableOnly = false;
+    let stationsWithUnserviceableTabFilterActive = false;
     let globalHeaders = [];
-    let globalRowsForWidgets = [];
     let processedHeaders = [];
     let processedRows = [];
+    let knownTimestamps = new Set();
+    let isInitialLoad = true;
+    let bannerDismissed = false;
+    let bannerTimeout = null;
+    let responseWidgetClearTimeout = null;
+    let responseWidgetInterval = null;
 
-    // Live Date & Time Clock
+    function unlockAudioSystem() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+
+        const banner = document.getElementById("audioUnlockBanner");
+        if (banner) {
+          banner.style.opacity = '0';
+          banner.style.transition = 'all 0.4s ease';
+          setTimeout(() => banner.remove(), 400);
+        }
+      } catch (e) {
+        console.log("Audio unlock failed:", e);
+      }
+    }
+
+    function playShortAudioAlert() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const notes = [880, 1174.66];
+        notes.forEach((freq, index) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (index * 0.3));
+          gain.gain.setValueAtTime(0.4, audioCtx.currentTime + (index * 0.3));
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (index * 0.3) + 0.2);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(audioCtx.currentTime + (index * 0.3));
+          osc.stop(audioCtx.currentTime + (index * 0.3) + 0.2);
+        });
+      } catch (e) {
+        console.log("Audio alert failed:", e);
+      }
+    }
+
     function updateClock() {
       const now = new Date();
-      const options = { 
-        weekday: 'short', 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit',
-        hour12: true 
-      };
-      const formatted = now.toLocaleString('en-US', options).toUpperCase();
+      const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
       const clockElement = document.getElementById('liveDateTime');
-      if (clockElement) clockElement.textContent = formatted;
+      if (clockElement) clockElement.textContent = now.toLocaleString('en-US', options).toUpperCase();
     }
 
     function parseCsvLine(text) {
@@ -245,98 +660,52 @@
       return isNaN(parsed) ? 0 : parsed;
     }
 
-    function isToday(timestampStr) {
-      if (!timestampStr) return false;
-      const parsedDate = new Date(timestampStr);
-      if (isNaN(parsedDate.getTime())) return false;
-      const today = new Date();
-      return parsedDate.getFullYear() === today.getFullYear() &&
-             parsedDate.getMonth() === today.getMonth() &&
-             parsedDate.getDate() === today.getDate();
-    }
-
     function findColumnIndex(headers, keywords) {
       return headers.findIndex(h => keywords.some(k => h.toLowerCase().includes(k.toLowerCase())));
     }
 
-    function deduplicateLatestSubmissions(headers, rows) {
-      const stationIdx = findColumnIndex(headers, ["station"]);
-      const timestampIdx = 0;
-
-      if (stationIdx === -1) return rows;
-
-      const latestByStationMap = new Map();
-
-      rows.forEach(row => {
-        const stationName = (row[stationIdx] || '').trim().toUpperCase();
-        if (!stationName) return;
-
-        const rowTime = new Date(row[timestampIdx]).getTime();
-
-        if (!latestByStationMap.has(stationName)) {
-          latestByStationMap.set(stationName, { row, time: rowTime });
-        } else {
-          const stored = latestByStationMap.get(stationName);
-          if (isNaN(rowTime) || rowTime >= stored.time) {
-            latestByStationMap.set(stationName, { row, time: rowTime });
-          }
-        }
-      });
-
-      return Array.from(latestByStationMap.values()).map(item => item.row);
+    function isToday(dateString) {
+      if (!dateString) return false;
+      const rowDate = new Date(dateString);
+      if (isNaN(rowDate.getTime())) {
+        const todayStr = new Date().toLocaleDateString('en-US');
+        return dateString.includes(todayStr) || dateString.includes(new Date().toISOString().split('T')[0]);
+      }
+      const today = new Date();
+      return rowDate.getDate() === today.getDate() && rowDate.getMonth() === today.getMonth() && rowDate.getFullYear() === today.getFullYear();
     }
 
-    function cleanAndConsolidateData(rawHeaders, rawRows) {
-      const stationIndices = [];
-      const excludeIndices = [];
-      
-      rawHeaders.forEach((h, idx) => {
-        const lower = h.toLowerCase();
-        
-        if (lower.includes("select station") || lower === "station") {
-          stationIndices.push(idx);
-        }
-        
-        if (lower.includes("upload") || lower.includes("application leave") || lower.includes("signed") || lower.includes("appointment")) {
-          excludeIndices.push(idx);
-        }
-      });
+    function resetResponseAlertWidgetToBlank() {
+      if (responseWidgetClearTimeout) clearTimeout(responseWidgetClearTimeout);
+      if (responseWidgetInterval) clearInterval(responseWidgetInterval);
 
-      const cleanHeaders = [];
-      const indexMapping = [];
-      let stationMerged = false;
+      const widget = document.getElementById("newResponseAlertWidget");
+      if (!widget) return;
 
-      rawHeaders.forEach((h, idx) => {
-        if (excludeIndices.includes(idx)) return;
-
-        if (stationIndices.includes(idx)) {
-          if (!stationMerged) {
-            cleanHeaders.push("SELECT STATION");
-            indexMapping.push(stationIndices);
-            stationMerged = true;
-          }
-        } else {
-          cleanHeaders.push(h);
-          indexMapping.push([idx]);
-        }
-      });
-
-      const cleanRows = rawRows.map(row => {
-        return indexMapping.map(mapArray => {
-          for (let colIdx of mapArray) {
-            const val = row[colIdx] ? row[colIdx].trim() : '';
-            if (val !== '') return val;
-          }
-          return '';
-        });
-      });
-
-      return { cleanHeaders, cleanRows };
+      widget.className = "bg-slate-900/95 border-2 border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-xl transition-all duration-300 relative";
+      document.getElementById("responseAlertIcon").textContent = "⏳";
+      document.getElementById("responseAlertTitle").textContent = "NEW RESPONSE ALERT — STANDBY FOR INCOMING DISPATCH";
+      document.getElementById("responseAlertSub").textContent = "MONITORING LIVE FEED FOR REAL-TIME EMERGENCY DISPATCHES...";
+      document.getElementById("responseAlertTimerBadge").classList.add("hidden");
+      document.getElementById("responseAlertContent").innerHTML = `NO RECENT EMERGENCY RESPONSE LOGGED YET. LIVE STREAM IS ACTIVE.`;
     }
 
     async function loadDashboardData() {
-      const config = SECTION_CONFIGS[currentSectionKey];
+      const config = SECTIONS[currentSectionKey];
       if (!config) return;
+
+      const controlFilterTab = document.getElementById("controlFilterTabContainer");
+      const mainTableCard = document.getElementById("mainTableCardContainer");
+
+      if (config.isUnderConstruction) {
+        controlFilterTab.classList.add("hidden");
+        mainTableCard.classList.add("hidden");
+        renderDynamicWidgets([], []);
+        return;
+      } else {
+        controlFilterTab.classList.remove("hidden");
+        mainTableCard.classList.remove("hidden");
+      }
       
       const csvUrl = `https://docs.google.com/spreadsheets/d/${config.sheetId}/export?format=csv&gid=${config.gid}`;
 
@@ -348,29 +717,47 @@
 
         const allParsedRows = lines.map(line => parseCsvLine(line));
         globalHeaders = allParsedRows[0];
-        const dataRows = allParsedRows.slice(1).filter(r => r.length > 1 && r[0] && r[0].trim() !== "" && !r[0].toLowerCase().includes("timestamp"));
+        const dataRows = allParsedRows.slice(1).filter(r => r.length > 1 && r[0] && r[0].trim() !== "");
 
-        const todayRows = dataRows.filter(row => isToday(row[0]));
-        const candidateRows = todayRows.length > 0 ? todayRows : dataRows;
-
-        const cleaned = cleanAndConsolidateData(globalHeaders, candidateRows);
+        const cleaned = config.cleanData(globalHeaders, dataRows);
         processedHeaders = cleaned.cleanHeaders;
-        
-        processedRows = deduplicateLatestSubmissions(processedHeaders, cleaned.cleanRows);
+        processedRows = cleaned.cleanRows;
+
+        if (currentSectionKey === 'active-dispatches') {
+          processedRows.forEach(row => {
+            const uniqueId = row[0] + (row[1] || '');
+            if (!knownTimestamps.has(uniqueId)) {
+              knownTimestamps.add(uniqueId);
+              if (!isInitialLoad) config.onLiveFeedUpdate(row, processedHeaders);
+            }
+          });
+          isInitialLoad = false;
+        }
+
+        if (currentSectionKey !== 'fire-ops') {
+          stationsWithUnserviceableTabFilterActive = false;
+        }
 
         populateStationDropdown(processedHeaders, processedRows);
         applyCombinedFilters();
       } catch (error) {
-        console.error("Error fetching sheet:", error);
+        console.error("Error fetching section data:", error);
       }
+    }
+
+    function toggleStationsWithUnserviceableTabFilter() {
+      if (currentSectionKey !== 'fire-ops') return;
+      stationsWithUnserviceableTabFilterActive = !stationsWithUnserviceableTabFilterActive;
+      populateStationDropdown(processedHeaders, processedRows);
+      applyCombinedFilters();
     }
 
     function populateStationDropdown(headers, rows) {
       const select = document.getElementById("stationFilter");
       const currentSelected = select.value;
-      
       const stationIdx = findColumnIndex(headers, ["station"]);
       const provIdx = findColumnIndex(headers, ["province"]);
+      const unservIdx = findColumnIndex(headers, ["unserviceable"]);
 
       if (stationIdx === -1) return;
 
@@ -378,44 +765,56 @@
       rows.forEach(r => {
         const province = provIdx !== -1 ? (r[provIdx] || '').toLowerCase() : '';
         const stationName = (r[stationIdx] || '').trim();
+        const unservCount = unservIdx !== -1 ? safeParse(r[unservIdx]) : 0;
 
         if (currentProvinceFilter === 'ALL' || province.includes(currentProvinceFilter)) {
-          if (stationName) stationsSet.add(stationName);
+          if (!stationsWithUnserviceableTabFilterActive || unservCount > 0) {
+            if (stationName) stationsSet.add(stationName);
+          }
         }
       });
 
       let optionsHtml = '<option value="ALL">ALL STATIONS</option>';
       Array.from(stationsSet).sort().forEach(st => {
-        const isSelected = st === currentSelected ? 'selected' : '';
-        optionsHtml += `<option value="${st}" ${isSelected}>${st}</option>`;
+        optionsHtml += `<option value="${st}" ${st === currentSelected ? 'selected' : ''}>${st}</option>`;
       });
-
       select.innerHTML = optionsHtml;
     }
 
     function applyCombinedFilters() {
+      const config = SECTIONS[currentSectionKey];
+      if (config.isUnderConstruction) return;
+
       const selectedStation = document.getElementById("stationFilter").value;
       const stationIdx = findColumnIndex(processedHeaders, ["station"]);
       const provIdx = findColumnIndex(processedHeaders, ["province"]);
       const unservIdx = findColumnIndex(processedHeaders, ["unserviceable"]);
 
-      let filteredRows = processedRows;
+      let filteredRows = config.filterRows(processedRows, processedHeaders);
 
       if (currentProvinceFilter !== 'ALL' && provIdx !== -1) {
         filteredRows = filteredRows.filter(r => (r[provIdx] || '').toLowerCase().includes(currentProvinceFilter));
+      }
+
+      if (stationsWithUnserviceableTabFilterActive && unservIdx !== -1) {
+        filteredRows = filteredRows.filter(r => safeParse(r[unservIdx]) > 0);
       }
 
       if (selectedStation !== "ALL" && stationIdx !== -1) {
         filteredRows = filteredRows.filter(r => (r[stationIdx] || '').trim() === selectedStation);
       }
 
-      if (filterUnserviceableOnly && unservIdx !== -1) {
-        filteredRows = filteredRows.filter(r => safeParse(r[unservIdx]) > 0);
-      }
-
-      updateDynamicWidgets(processedHeaders, filteredRows);
-      checkCriticalOperationalAlerts(processedHeaders, filteredRows);
+      renderDynamicWidgets(processedHeaders, filteredRows);
+      if (currentSectionKey === 'fire-ops') checkCriticalOperationalAlerts(processedHeaders, filteredRows);
       renderDynamicMainTable(processedHeaders, filteredRows);
+    }
+
+    function dismissTopBanner() {
+      const alertBanner = document.getElementById("criticalAlertBanner");
+      alertBanner.classList.remove("mega-alert-banner");
+      alertBanner.classList.add("top-banner-exit");
+      bannerDismissed = true;
+      if (bannerTimeout) clearTimeout(bannerTimeout);
     }
 
     function checkCriticalOperationalAlerts(headers, dataRows) {
@@ -430,7 +829,6 @@
       const stationsContainer = document.getElementById("criticalStationsContainer");
 
       stationsContainer.innerHTML = "";
-
       const criticalStations = [];
 
       dataRows.forEach(row => {
@@ -440,73 +838,71 @@
         const actual = actualIdx !== -1 ? safeParse(row[actualIdx]) : 0;
 
         let reason = "";
+        if (actualIdx !== -1 && actual < 1) reason = "0 OPERATIONAL TRUCKS";
+        else if (total > 0 && unserv >= total) reason = `100% UNSERVICEABLE (${unserv}/${total})`;
 
-        if (actual < 1) {
-          reason = "Zero (0) Operational Trucks";
-        } else if (total > 0 && unserv >= total) {
-          reason = `100% Unserviceable (${unserv}/${total})`;
-        }
-
-        if (reason && stationName) {
-          criticalStations.push({ stationName, reason });
-        }
+        if (reason && stationName) criticalStations.push({ stationName, reason });
       });
 
       if (criticalStations.length > 0) {
-        alertMsg.textContent = `The following station(s) have no Operational Firetrucks`;
-        alertBadge.textContent = `${criticalStations.length} STATION(S) AFFECTED`;
+        alertMsg.textContent = `Immediate command intervention required for unit(s) reporting critical operational status (${currentProvinceFilter.toUpperCase()} view):`;
+        alertBadge.textContent = `${criticalStations.length} STATION(S) REQUIRING ATTENTION`;
 
         criticalStations.forEach(item => {
           const badge = document.createElement("div");
-          badge.className = "bg-rose-900/90 border border-rose-500 text-rose-100 px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-2 shadow-sm";
-          badge.innerHTML = `
-            <span>📍 ${item.stationName}</span>
-            <span class="bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded uppercase font-sans">${item.reason}</span>
-          `;
+          badge.className = "bg-gradient-to-r from-rose-600 via-rose-700 to-red-700 text-white px-5 py-3 rounded-2xl text-xs md:text-sm font-black tracking-wide flex items-center gap-3.5 shadow-xl shadow-rose-600/50 border border-rose-300 ring-2 ring-rose-500/60";
+          badge.innerHTML = `<span class="text-sm md:text-base">📍 ${item.stationName.toUpperCase()}</span><span class="bg-black/50 text-rose-100 text-xs px-2.5 py-1 rounded-xl border border-rose-400/40 font-mono">${item.reason}</span>`;
           stationsContainer.appendChild(badge);
         });
 
-        alertBanner.classList.remove("hidden");
+        if (!bannerDismissed) {
+          alertBanner.classList.remove("hidden", "top-banner-exit");
+          alertBanner.classList.add("mega-alert-banner");
+          playShortAudioAlert();
+          if (bannerTimeout) clearTimeout(bannerTimeout);
+          bannerTimeout = setTimeout(dismissTopBanner, 15000);
+        }
       } else {
         alertBanner.classList.add("hidden");
       }
     }
 
-    function getMetricColorClass(label) {
-      const lower = label.toLowerCase();
-      if (lower.includes("unserv")) return "text-rose-500 drop-shadow-[0_0_12px_rgba(244,63,94,0.3)]";
-      if (lower.includes("actual") || lower.includes("duty")) return "text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.3)]";
-      if (lower.includes("leave")) return "text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.3)]";
-      if (lower.includes("truck") || lower.includes("total")) return "text-blue-400 drop-shadow-[0_0_12px_rgba(96,165,250,0.3)]";
-      return "text-slate-100";
-    }
-
-    function updateDynamicWidgets(headers, dataRows) {
+    function renderDynamicWidgets(headers, dataRows) {
+      const config = SECTIONS[currentSectionKey];
       const container = document.getElementById("hudWidgetsContainer");
       container.innerHTML = "";
 
-      const numericIndices = [];
-      headers.forEach((header, index) => {
-        const lower = header.toLowerCase();
-        if (!lower.includes("timestamp") && !lower.includes("rank") && !lower.includes("name") && !lower.includes("province") && !lower.includes("station") && !lower.includes("appointment")) {
-          numericIndices.push(index);
-        }
-      });
+      const widgetDataList = config.renderWidgets(headers, dataRows);
 
-      numericIndices.slice(0, 6).forEach(colIndex => {
-        const label = headers[colIndex] || `METRIC ${colIndex}`;
-        const sum = dataRows.reduce((acc, row) => acc + safeParse(row[colIndex]), 0);
-        const colorClass = getMetricColorClass(label);
+      if (config.isUnderConstruction) {
+        container.className = `grid grid-cols-1 sm:grid-cols-2 gap-5`;
+      } else if (currentSectionKey === 'fire-ops') {
+        container.className = `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5`;
+      } else {
+        container.className = `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5`;
+      }
 
+      widgetDataList.forEach(item => {
+        if (!item.label && !item.count) return;
         const card = document.createElement("div");
-        card.className = "bg-gradient-to-b from-slate-900/90 to-slate-900/50 border border-slate-800 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:border-slate-700 transition-all duration-300 flex flex-col justify-between group min-h-[150px]";
+        
+        let clickableClasses = "";
+        if (item.clickable) {
+          clickableClasses = " cursor-pointer hover:ring-2 hover:ring-rose-400 active:scale-95 transition-all";
+        }
+
+        card.className = `bg-gradient-to-br ${item.bg} border-2 ${item.border} rounded-3xl p-5 shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between min-h-[140px] overflow-hidden${clickableClasses}`;
+        
+        if (item.clickable && item.action === "toggleUnserviceableFilter") {
+          card.setAttribute("onclick", "toggleStationsWithUnserviceableTabFilter()");
+        }
+
         card.innerHTML = `
-          <span class="text-xs md:text-sm font-extrabold text-slate-300 uppercase tracking-wide block leading-snug group-hover:text-white transition-colors">
-            ${label}
-          </span>
-          <div class="text-5xl lg:text-6xl font-black ${colorClass} font-mono tracking-tight mt-3">
-            ${sum.toLocaleString()}
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            <span class="text-xs font-black text-slate-200 uppercase tracking-wide block leading-snug truncate pr-1" title="${item.label}">${item.label}</span>
+            ${item.pulse ? '<span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping flex-shrink-0"></span>' : ''}
           </div>
+          <div class="text-3xl lg:text-4xl font-black ${item.color} ${item.glow} font-mono tracking-tight mt-3 truncate">${item.count}</div>
         `;
         container.appendChild(card);
       });
@@ -517,24 +913,37 @@
       const tableBody = document.getElementById("mainTableBody");
 
       let headHtml = '<tr class="text-slate-400 text-xs uppercase border-b border-slate-800/80 bg-slate-950/40">';
-      headers.forEach(h => { headHtml += `<th class="p-3.5 font-bold">${h || 'FIELD'}</th>`; });
+      headers.forEach(h => { 
+        const lowerH = (h || '').toLowerCase();
+        if (lowerH === "province" || lowerH === "station" || lowerH.includes("rank | name") || lowerH.includes("name")) {
+          headHtml += `<th class="p-3.5 font-black text-white bg-rose-950/50 border-x border-rose-500/50 shadow-inner"><strong>${h || 'FIELD'}</strong></th>`;
+        } else {
+          headHtml += `<th class="p-3.5 font-bold">${h || 'FIELD'}</th>`; 
+        }
+      });
       headHtml += '</tr>';
       tableHead.innerHTML = headHtml;
 
       if (rows.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="${headers.length}" class="p-6 text-center text-slate-500 font-medium">No records found matching current filters.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="${headers.length}" class="p-6 text-center text-slate-500 font-medium">No records found for this section.</td></tr>`;
         return;
       }
 
       let bodyHtml = "";
       rows.forEach(row => {
         bodyHtml += `<tr class="hover:bg-slate-800/40 transition-colors">`;
-        headers.forEach((_, cIndex) => {
-          const val = row[cIndex] || '0';
-          let style = "text-slate-300";
-          if (cIndex === 0) style = "text-slate-400";
-          if (cIndex === 1) style = "text-white font-bold";
-          bodyHtml += `<td class="p-3.5 ${style}">${val}</td>`;
+        headers.forEach((h, cIndex) => {
+          const val = row[cIndex] || '—';
+          let cellMarkup = `<span class="text-slate-300">${val}</span>`;
+          const lowerH = (h || '').toLowerCase();
+          if (lowerH === "province" || lowerH === "station" || lowerH.includes("rank | name") || lowerH.includes("name")) {
+            cellMarkup = `<strong class="text-white font-black">${val}</strong>`;
+          } else if (cIndex === 0) {
+            cellMarkup = `<span class="text-slate-400 font-mono">${val}</span>`;
+          } else if (cIndex === 1) {
+            cellMarkup = `<span class="text-white font-bold">${val}</span>`;
+          }
+          bodyHtml += `<td class="p-3.5">${cellMarkup}</td>`;
         });
         bodyHtml += '</tr>';
       });
@@ -550,19 +959,6 @@
 
       document.getElementById("stationFilter").addEventListener("change", applyCombinedFilters);
 
-      const unservBtn = document.getElementById("unserviceableToggleBtn");
-      unservBtn.addEventListener("click", () => {
-        filterUnserviceableOnly = !filterUnserviceableOnly;
-        if (filterUnserviceableOnly) {
-          unservBtn.classList.remove("bg-slate-900", "border-slate-700", "text-slate-300");
-          unservBtn.classList.add("bg-rose-600", "border-rose-500", "text-white", "shadow-md", "shadow-rose-600/30");
-        } else {
-          unservBtn.classList.remove("bg-rose-600", "border-rose-500", "text-white", "shadow-md", "shadow-rose-600/30");
-          unservBtn.classList.add("bg-slate-900", "border-slate-700", "text-slate-300");
-        }
-        applyCombinedFilters();
-      });
-
       document.querySelectorAll('.prov-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('.prov-btn').forEach(b => {
@@ -575,7 +971,7 @@
           activeBtn.classList.add('bg-rose-600', 'text-white', 'shadow-md', 'shadow-rose-600/30');
 
           currentProvinceFilter = activeBtn.getAttribute('data-province');
-          
+          bannerDismissed = false;
           populateStationDropdown(processedHeaders, processedRows);
           document.getElementById("stationFilter").value = "ALL";
           applyCombinedFilters();
@@ -585,18 +981,41 @@
       document.querySelectorAll('.section-btn').forEach(button => {
         button.addEventListener('click', (e) => {
           document.querySelectorAll('.section-btn').forEach(btn => {
-            btn.classList.remove('bg-slate-800', 'border-l-4', 'border-rose-500', 'text-white', 'shadow-md', 'active');
-            btn.classList.add('text-slate-300');
+            btn.classList.remove(
+              'bg-gradient-to-r', 'from-rose-950/80', 'via-slate-800', 'to-slate-800/90', 
+              'border-l-4', 'border-rose-500', 'border-y', 'border-r', 'border-slate-700/60', 
+              'text-white', 'shadow-lg', 'shadow-rose-950/40', 'active', 'scale-[1.01]'
+            );
+            btn.classList.add('text-slate-300', 'border', 'border-slate-800/80');
           });
 
           const activeBtn = e.currentTarget;
-          activeBtn.classList.add('bg-slate-800', 'border-l-4', 'border-rose-500', 'text-white', 'shadow-md', 'active');
-          
+          activeBtn.classList.remove('text-slate-300', 'border-slate-800/80');
+          activeBtn.classList.add(
+            'bg-gradient-to-r', 'from-rose-950/80', 'via-slate-800', 'to-slate-800/90', 
+            'border-l-4', 'border-rose-500', 'border-y', 'border-r', 'border-slate-700/60', 
+            'text-white', 'shadow-lg', 'shadow-rose-950/40', 'active', 'scale-[1.01]'
+          );
+
           currentSectionKey = activeBtn.getAttribute('data-section');
-          const config = SECTION_CONFIGS[currentSectionKey];
-          if (config) {
-            document.getElementById('hudTitle').innerHTML = `<span class="text-lg">🔥</span> ${config.title.toUpperCase()} — SUMMARY MATRIX`;
-            document.getElementById('tableMainTitle').textContent = `Live Google Sheets ${config.title} Table`;
+          bannerDismissed = false;
+          
+          document.querySelectorAll('.section-exclusive-widget').forEach(el => el.classList.add('hidden'));
+          const activeConfig = SECTIONS[currentSectionKey];
+          const targetContainerId = activeConfig.getWidgetContainerId();
+          const targetContainer = document.getElementById(targetContainerId);
+          if (targetContainer) targetContainer.classList.remove('hidden');
+
+          if (currentSectionKey === 'active-dispatches') resetResponseAlertWidgetToBlank();
+
+          if (activeConfig) {
+            document.getElementById('hudTitle').innerHTML = `<span class="text-lg">${activeConfig.icon}</span> ${activeConfig.title.toUpperCase()} — LIVE STREAM FEED`;
+            document.getElementById('tableMainTitle').textContent = `Live Google Sheets ${activeConfig.title} Table`;
+            
+            if (activeConfig.isUnderConstruction) {
+              document.getElementById('constructionSubtitle').textContent = `The ${activeConfig.title} module is currently being built and integrated into the regional framework. Full telemetry streams will go live soon.`;
+            }
+
             loadDashboardData();
           }
         });
