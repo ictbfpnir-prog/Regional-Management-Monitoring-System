@@ -26,19 +26,14 @@
       </div>
     </div>
 
-    <div class="flex items-center gap-4">
-      <button class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-md shadow-rose-600/20 flex items-center gap-2">
-        📈 Summary Dashboard
-      </button>
-      <button class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2 rounded-lg border border-slate-700 transition flex items-center gap-2">
-        🗺️ NIR Fire Station Map
-      </button>
-      
-      <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-full text-xs shadow-inner">
-        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span class="text-slate-300 font-mono font-semibold">LIVE SYNC</span>
-        <span id="lastSyncTime" class="text-slate-500 font-mono text-[11px] border-l border-slate-800 pl-2">--:--:--</span>
+    <!-- ENHANCED STYLIZED DATE & TIME DISPLAY -->
+    <div class="flex items-center gap-3 bg-slate-950 border border-slate-800/90 px-5 py-2.5 rounded-2xl shadow-xl shadow-slate-950/60 ring-1 ring-slate-800">
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
       </div>
+      <span id="liveDateTime" class="text-sm md:text-base font-extrabold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-cyan-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.3)]">
+        LOADING DATE & TIME...
+      </span>
     </div>
   </header>
 
@@ -152,6 +147,12 @@
               </select>
             </div>
 
+            <!-- UNSERVICEABLE ONLY TOGGLE BUTTON -->
+            <button id="unserviceableToggleBtn" class="bg-slate-900 hover:bg-rose-950/60 border border-slate-700 text-slate-300 hover:text-rose-400 text-xs font-bold px-3.5 py-2 rounded-xl transition duration-200 flex items-center gap-1.5 shadow-sm">
+              <span>🚨</span>
+              <span>Show Unserviceable</span>
+            </button>
+
             <span class="text-xs text-emerald-400 font-mono font-semibold bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/20 whitespace-nowrap shadow-sm">
               ⚡ REAL-TIME SYNC
             </span>
@@ -201,10 +202,29 @@
 
     let currentSectionKey = 'fire-ops';
     let currentProvinceFilter = 'ALL';
+    let filterUnserviceableOnly = false;
     let globalHeaders = [];
     let globalRowsForWidgets = [];
     let processedHeaders = [];
     let processedRows = [];
+
+    // Live Date & Time Clock
+    function updateClock() {
+      const now = new Date();
+      const options = { 
+        weekday: 'short', 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: true 
+      };
+      const formatted = now.toLocaleString('en-US', options).toUpperCase();
+      const clockElement = document.getElementById('liveDateTime');
+      if (clockElement) clockElement.textContent = formatted;
+    }
 
     function parseCsvLine(text) {
       const result = [];
@@ -239,12 +259,9 @@
       return headers.findIndex(h => keywords.some(k => h.toLowerCase().includes(k.toLowerCase())));
     }
 
-    // -------------------------------------------------------------
-    // SOLUTION 1: DEDUPLICATE BY STATION (LATEST SUBMISSION WINS)
-    // -------------------------------------------------------------
     function deduplicateLatestSubmissions(headers, rows) {
       const stationIdx = findColumnIndex(headers, ["station"]);
-      const timestampIdx = 0; // Column A is Timestamp
+      const timestampIdx = 0;
 
       if (stationIdx === -1) return rows;
 
@@ -260,7 +277,6 @@
           latestByStationMap.set(stationName, { row, time: rowTime });
         } else {
           const stored = latestByStationMap.get(stationName);
-          // If this row has a newer timestamp (or timestamp parse failed), overwrite
           if (isNaN(rowTime) || rowTime >= stored.time) {
             latestByStationMap.set(stationName, { row, time: rowTime });
           }
@@ -334,21 +350,16 @@
         globalHeaders = allParsedRows[0];
         const dataRows = allParsedRows.slice(1).filter(r => r.length > 1 && r[0] && r[0].trim() !== "" && !r[0].toLowerCase().includes("timestamp"));
 
-        // 1. Filter for today's submissions
         const todayRows = dataRows.filter(row => isToday(row[0]));
         const candidateRows = todayRows.length > 0 ? todayRows : dataRows;
 
-        // 2. Clean and merge columns
         const cleaned = cleanAndConsolidateData(globalHeaders, candidateRows);
         processedHeaders = cleaned.cleanHeaders;
         
-        // 3. Deduplicate: Keep only the latest entry per station for today
         processedRows = deduplicateLatestSubmissions(processedHeaders, cleaned.cleanRows);
 
         populateStationDropdown(processedHeaders, processedRows);
         applyCombinedFilters();
-
-        document.getElementById("lastSyncTime").textContent = new Date().toLocaleTimeString();
       } catch (error) {
         console.error("Error fetching sheet:", error);
       }
@@ -386,6 +397,7 @@
       const selectedStation = document.getElementById("stationFilter").value;
       const stationIdx = findColumnIndex(processedHeaders, ["station"]);
       const provIdx = findColumnIndex(processedHeaders, ["province"]);
+      const unservIdx = findColumnIndex(processedHeaders, ["unserviceable"]);
 
       let filteredRows = processedRows;
 
@@ -397,14 +409,15 @@
         filteredRows = filteredRows.filter(r => (r[stationIdx] || '').trim() === selectedStation);
       }
 
+      if (filterUnserviceableOnly && unservIdx !== -1) {
+        filteredRows = filteredRows.filter(r => safeParse(r[unservIdx]) > 0);
+      }
+
       updateDynamicWidgets(processedHeaders, filteredRows);
       checkCriticalOperationalAlerts(processedHeaders, filteredRows);
       renderDynamicMainTable(processedHeaders, filteredRows);
     }
 
-    // -------------------------------------------------------------
-    // CRITICAL OPERATIONAL ALERT CHECKER WITH STATION DRILLDOWN
-    // -------------------------------------------------------------
     function checkCriticalOperationalAlerts(headers, dataRows) {
       const totalIdx = findColumnIndex(headers, ["total truck", "total trucks"]);
       const unservIdx = findColumnIndex(headers, ["unserviceable"]);
@@ -440,7 +453,7 @@
       });
 
       if (criticalStations.length > 0) {
-        alertMsg.textContent = `The following station(s) are reporting CRITICAL FLEET DEFICITS under current filter window (${currentProvinceFilter.toUpperCase()}):`;
+        alertMsg.textContent = `The following station(s) have no Operational Firetrucks`;
         alertBadge.textContent = `${criticalStations.length} STATION(S) AFFECTED`;
 
         criticalStations.forEach(item => {
@@ -529,10 +542,26 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      updateClock();
+      setInterval(updateClock, 1000);
+
       loadDashboardData();
       setInterval(loadDashboardData, 10000);
 
       document.getElementById("stationFilter").addEventListener("change", applyCombinedFilters);
+
+      const unservBtn = document.getElementById("unserviceableToggleBtn");
+      unservBtn.addEventListener("click", () => {
+        filterUnserviceableOnly = !filterUnserviceableOnly;
+        if (filterUnserviceableOnly) {
+          unservBtn.classList.remove("bg-slate-900", "border-slate-700", "text-slate-300");
+          unservBtn.classList.add("bg-rose-600", "border-rose-500", "text-white", "shadow-md", "shadow-rose-600/30");
+        } else {
+          unservBtn.classList.remove("bg-rose-600", "border-rose-500", "text-white", "shadow-md", "shadow-rose-600/30");
+          unservBtn.classList.add("bg-slate-900", "border-slate-700", "text-slate-300");
+        }
+        applyCombinedFilters();
+      });
 
       document.querySelectorAll('.prov-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
