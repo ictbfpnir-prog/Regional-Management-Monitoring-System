@@ -15,15 +15,15 @@ export const config = {
 export default function middleware(request) {
   const authHeader = request.headers.get('authorization');
 
-  const validUser = process.env.BASIC_AUTH_USER;
-  const validPass = process.env.BASIC_AUTH_PASS;
+  const validUser = process.env.RMMS_bfpnir_admin;
+  const validPass = process.env.RMMS_bfpnir2026;
 
   // Fail closed: if the env vars aren't set, block access rather than
   // silently letting everyone through. Forces you to configure credentials
   // before this ever goes live.
   if (!validUser || !validPass) {
     return new Response(
-      'Access is not configured. Set BASIC_AUTH_USER and BASIC_AUTH_PASS in your Vercel project environment variables.',
+      'Access is not configured. Set RMMS_bfpnir_admin and RMMS_bfpnir2026 in your Vercel project environment variables.',
       { status: 500 }
     );
   }
