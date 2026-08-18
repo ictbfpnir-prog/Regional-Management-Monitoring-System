@@ -295,8 +295,8 @@
       // which Google's endpoint can silently accept without actually recording the
       // response. URLSearchParams matches what a real form submit sends.
       const params = new URLSearchParams();
-      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.province}`, KIOSK_CONFIG.PROVINCE);
-      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.station}`, KIOSK_CONFIG.STATION);
+      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.province}`, KIOSK_CONFIG.Province);
+      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.station}`, KIOSK_CONFIG.Station);
       params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.personnel}`, personnelText);
       params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.dutySchedule}`, KIOSK_CONFIG.DEFAULT_DUTY_SCHEDULE);
       params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.timeIn}`, action === 'timeIn' ? timeStr : '');
