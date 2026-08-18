@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>BFP-NIR Attendance Kiosk</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <style>
+    html, body { height: 100%; overscroll-behavior: none; }
+    @keyframes scanLine {
+      0% { top: 6%; }
+      50% { top: 92%; }
+      100% { top: 6%; }
+    }
+    .scan-line { animation: scanLine 2.4s ease-in-out infinite; }
+    @keyframes popIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .pop-in { animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes pulseRing {
+      0% { box-shadow: 0 0 0 0 rgba(244,63,94,0.55); }
+      100% { box-shadow: 0 0 0 24px rgba(244,63,94,0); }
+    }
+    .pulse-ring { animation: pulseRing 1.6s ease-out infinite; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased h-full flex flex-col overflow-hidden">
+
+  <!-- ====================================================================
+       DEVICE CONFIG — set these once per kiosk / station where it's deployed.
+       ==================================================================== -->
+  <script>
+    const KIOSK_CONFIG = {
+      // This physical device's fixed location. Every scan logged here is
+      // recorded against this province/station — the kiosk doesn't ask.
+      PROVINCE: "Negros Occidental",       // must match one of your Sheet's province values
+      STATION: "Office of the Regional Director - Negros Island Region",  // fixed per-device station name
+
+      // The Sheet backing your Personnel Attendance module (same one used in index.html),
+      // used only to check whether today's Time In already exists for a scanned person.
+      SHEET_ID: "1XFulUk7DbEMVA-DpHYPFxTb-gifxGg28SMJpifFXeWk",
+      GID: "1897751193",
+
+      // Your Google Form's submission endpoint + each field's entry ID.
+      // Get these via Google Forms > the three-dot menu > "Get pre-filled link" >
+      // fill dummy values for every question > "Get link" > copy it, then read off
+      // each entry.XXXXXXXXX= in the URL. See the setup guide for the full walkthrough.
+      FORM_ACTION_URL: "https://docs.google.com/forms/d/e/1FAIpQLScx-LGvATzXuKCeeFDcaVkxYLdNyCtUn8OYr7LlORyt59qdWQ/formResponse",
+      ENTRY_IDS: {
+        province: "648476032",
+        station: "1397064161",
+        personnel: "1373693953",     // "Rank | Name"
+        dutySchedule: "1342303207",
+        timeIn: "1097343299",
+        timeOut: "1371971817",
+        status: "529734612",
+        leaveType: "39692605",
+        remarks: "1491343842"        // Remarks
+      },
+
+      // Personnel scanning in after this hour (24h clock) get logged as "Late" instead of "Present".
+      LATE_AFTER_HOUR: 8,
+
+      // Seconds to ignore repeat scans of the same code, so one person walking past
+      // slowly doesn't get logged twice in a row.
+      SCAN_COOLDOWN_SECONDS: 8,
+
+      // How long the big confirmation banner stays up before the scanner resumes.
+      CONFIRMATION_DISPLAY_MS: 4000
+    };
+  </script>
+
+  <!-- HEADER -->
+  <header class="px-6 py-4 flex items-center justify-between border-b border-slate-800/80 bg-slate-900/60">
+    <div class="flex items-center gap-3">
+      <div class="bg-rose-600 p-2 rounded-xl text-white text-lg shadow-lg shadow-rose-600/30">🛡️</div>
+      <div>
+        <h1 class="text-sm font-black text-white tracking-wide uppercase">BFP-NIR Attendance Kiosk</h1>
+        <p id="stationLabel" class="text-[11px] text-slate-400 font-mono">Loading station config…</p>
+      </div>
+    </div>
+    <div id="kioskClock" class="text-sm font-mono font-bold text-emerald-400">--:--:--</div>
+  </header>
+
+  <!-- MAIN SCANNER AREA -->
+  <main class="flex-1 relative flex items-center justify-center p-6">
+
+    <!-- CAMERA VIEW -->
+    <div class="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden border-4 border-slate-800 shadow-2xl bg-slate-900">
+      <video id="cameraFeed" class="w-full h-full object-cover" playsinline muted></video>
+      <canvas id="scanCanvas" class="hidden"></canvas>
+
+      <!-- Scan reticle -->
+      <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute inset-8 border-2 border-rose-500/70 rounded-2xl"></div>
+        <div class="scan-line absolute left-8 right-8 h-0.5 bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.9)]"></div>
+      </div>
+
+      <!-- Camera error / permission overlay -->
+      <div id="cameraErrorOverlay" class="hidden absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center text-center p-6 gap-3">
+        <span class="text-4xl">📷</span>
+        <p class="text-sm font-bold text-rose-300">Camera access needed</p>
+        <p id="cameraErrorDetail" class="text-xs text-slate-400 font-mono max-w-xs"></p>
+        <button onclick="startCamera()" class="mt-2 bg-rose-600 hover:bg-rose-500 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wide">Retry Camera</button>
+      </div>
+    </div>
+
+    <!-- STATUS LINE -->
+    <p id="scannerStatus" class="absolute bottom-6 left-0 right-0 text-center text-xs font-mono text-slate-400 px-6">
+      Point ID QR code at the camera to log Time In / Time Out
+    </p>
+
+    <!-- CONFIRMATION OVERLAY (shown after a successful scan) -->
+    <div id="confirmationOverlay" class="hidden absolute inset-0 bg-slate-950/97 flex items-center justify-center p-6 z-20">
+      <div class="pop-in text-center space-y-4 max-w-sm">
+        <div id="confirmationIconRing" class="pulse-ring w-20 h-20 mx-auto rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center text-4xl">✅</div>
+        <h2 id="confirmationTitle" class="text-lg font-black uppercase tracking-wider text-white">Time In Logged</h2>
+        <p id="confirmationName" class="text-2xl font-black text-emerald-400">—</p>
+        <p id="confirmationMeta" class="text-xs font-mono text-slate-400">—</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let videoStream = null;
+    let scanLoopActive = false;
+    let lastScanText = null;
+    let lastScanTime = 0;
+    let isSubmitting = false;
+
+    // ---- Clock ----
+    function updateKioskClock() {
+      const now = new Date();
+      document.getElementById('kioskClock').textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    }
+    setInterval(updateKioskClock, 1000);
+    updateKioskClock();
+
+    document.getElementById('stationLabel').textContent = `${KIOSK_CONFIG.STATION} — ${KIOSK_CONFIG.PROVINCE}`;
+
+    // ---- Camera + scan loop ----
+    async function startCamera() {
+      const errorOverlay = document.getElementById('cameraErrorOverlay');
+      const errorDetail = document.getElementById('cameraErrorDetail');
+      errorOverlay.classList.add('hidden');
+
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 1280 } }
+        });
+        const video = document.getElementById('cameraFeed');
+        video.srcObject = videoStream;
+        await video.play();
+        scanLoopActive = true;
+        requestAnimationFrame(scanTick);
+      } catch (err) {
+        console.error('Camera error:', err);
+        errorDetail.textContent = err.message || 'Could not access the camera. Check browser permissions.';
+        errorOverlay.classList.remove('hidden');
+      }
+    }
+
+    function scanTick() {
+      if (!scanLoopActive) return;
+      const video = document.getElementById('cameraFeed');
+      const canvas = document.getElementById('scanCanvas');
+
+      if (video.readyState === video.HAVE_ENOUGH_DATA && !isSubmitting) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+
+        if (code && code.data) {
+          handleScannedCode(code.data.trim());
+        }
+      }
+      requestAnimationFrame(scanTick);
+    }
+
+    async function handleScannedCode(text) {
+      const now = Date.now();
+      // Cooldown: ignore the same code scanned again within the window (avoids double-fire
+      // while someone's ID sits in frame for a second or two).
+      if (text === lastScanText && (now - lastScanTime) < KIOSK_CONFIG.SCAN_COOLDOWN_SECONDS * 1000) return;
+
+      lastScanText = text;
+      lastScanTime = now;
+      isSubmitting = true;
+
+      const statusEl = document.getElementById('scannerStatus');
+      statusEl.textContent = `Recognized: ${text} — checking today's record…`;
+
+      try {
+        const todaysEntries = await getTodaysEntriesForPerson(text);
+        const action = todaysEntries.length === 0 ? 'timeIn' : (todaysEntries.length === 1 ? 'timeOut' : 'already-complete');
+
+        if (action === 'already-complete') {
+          showConfirmation({
+            success: false,
+            title: 'Already Logged Today',
+            name: text,
+            meta: 'Both Time In and Time Out are already recorded for today.'
+          });
+        } else {
+          await submitAttendance(text, action);
+          const now2 = new Date();
+          const timeStr = now2.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+          showConfirmation({
+            success: true,
+            title: action === 'timeIn' ? 'Time In Logged' : 'Time Out Logged',
+            name: text,
+            meta: `${timeStr} — ${KIOSK_CONFIG.STATION}`
+          });
+        }
+      } catch (err) {
+        console.error('Attendance submit error:', err);
+        showConfirmation({
+          success: false,
+          title: 'Could Not Log Attendance',
+          name: text,
+          meta: 'Check the kiosk\'s network connection and try scanning again.'
+        });
+      }
+
+      isSubmitting = false;
+    }
+
+    // Reads today's rows for this person from the live Sheet, to decide Time In vs Time Out.
+    async function getTodaysEntriesForPerson(personnelText) {
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${KIOSK_CONFIG.SHEET_ID}/export?format=csv&gid=${KIOSK_CONFIG.GID}`;
+      const response = await fetch(csvUrl);
+      const textData = await response.text();
+      const lines = textData.split(/\r?\n/).filter(l => l.trim() !== "");
+      if (lines.length === 0) return [];
+
+      const rows = lines.map(parseCsvLine);
+      const headers = rows[0];
+      const dataRows = rows.slice(1);
+
+      const tsIdx = headers.findIndex(h => h.toLowerCase().includes('timestamp'));
+      const nameIdx = headers.findIndex(h => h.toLowerCase().includes('rank | name') || h.toLowerCase().includes('name'));
+      if (tsIdx === -1 || nameIdx === -1) return [];
+
+      return dataRows.filter(r => {
+        const matchesPerson = (r[nameIdx] || '').trim().toLowerCase() === personnelText.toLowerCase();
+        const matchesToday = isToday(r[tsIdx]);
+        return matchesPerson && matchesToday;
+      });
+    }
+
+    function parseCsvLine(text) {
+      const result = [];
+      let cell = '', inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === '"') inQuotes = !inQuotes;
+        else if (char === ',' && !inQuotes) { result.push(cell.trim().replace(/^"|"$/g, '')); cell = ''; }
+        else cell += char;
+      }
+      result.push(cell.trim().replace(/^"|"$/g, ''));
+      return result;
+    }
+
+    function isToday(dateString) {
+      if (!dateString) return false;
+      const rowDate = new Date(dateString);
+      if (isNaN(rowDate.getTime())) return false;
+      const today = new Date();
+      return rowDate.getDate() === today.getDate() && rowDate.getMonth() === today.getMonth() && rowDate.getFullYear() === today.getFullYear();
+    }
+
+    // Submits a new row via the Google Form's formResponse endpoint. Uses mode:'no-cors'
+    // because Google Forms doesn't return CORS headers for this — we can't read the
+    // response, only fire the submission, which is the standard approach for this.
+    async function submitAttendance(personnelText, action) {
+      const now = new Date();
+      const hour = now.getHours();
+      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+      const status = action === 'timeIn' ? (hour >= KIOSK_CONFIG.LATE_AFTER_HOUR ? 'Late' : 'Present') : 'Present';
+
+      const formData = new FormData();
+      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.province}`, KIOSK_CONFIG.PROVINCE);
+      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.station}`, KIOSK_CONFIG.STATION);
+      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.personnel}`, personnelText);
+      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.dutySchedule}`, 'N/A');
+      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.timeIn}`, action === 'timeIn' ? timeStr : '');
+      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.timeOut}`, action === 'timeOut' ? timeStr : '');
+      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.status}`, status);
+      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.leaveType}`, 'N/A');
+      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.remarks}`, 'Logged via QR kiosk');
+
+      await fetch(KIOSK_CONFIG.FORM_ACTION_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      });
+    }
+
+    function showConfirmation({ success, title, name, meta }) {
+      const overlay = document.getElementById('confirmationOverlay');
+      const ring = document.getElementById('confirmationIconRing');
+      const titleEl = document.getElementById('confirmationTitle');
+      const nameEl = document.getElementById('confirmationName');
+      const metaEl = document.getElementById('confirmationMeta');
+
+      ring.textContent = success ? '✅' : '⚠️';
+      ring.className = success
+        ? 'pulse-ring w-20 h-20 mx-auto rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center text-4xl'
+        : 'w-20 h-20 mx-auto rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center text-4xl';
+      titleEl.textContent = title;
+      titleEl.className = success ? 'text-lg font-black uppercase tracking-wider text-white' : 'text-lg font-black uppercase tracking-wider text-amber-300';
+      nameEl.textContent = name;
+      metaEl.textContent = meta;
+
+      overlay.classList.remove('hidden');
+      document.getElementById('scannerStatus').textContent = 'Point ID QR code at the camera to log Time In / Time Out';
+
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+      }, KIOSK_CONFIG.CONFIRMATION_DISPLAY_MS);
+    }
+
+    startCamera();
+  </script>
+</body>
+</html>
