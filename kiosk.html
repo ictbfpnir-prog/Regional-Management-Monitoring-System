@@ -63,6 +63,13 @@
       // Personnel scanning in after this hour (24h clock) get logged as "Late" instead of "Present".
       LATE_AFTER_HOUR: 8,
 
+      // Must exactly match one of your Form's Duty Schedule dropdown options
+      // (AM Shift / PM Shift / 24-Hour Duty / Admin) — this device defaults to
+      // "Admin" since it's the Office of the Regional Director, not a station.
+      // Sending a value that ISN'T one of the dropdown's real options can cause
+      // Google Forms to silently reject the entire submission.
+      DEFAULT_DUTY_SCHEDULE: "Admin",
+
       // Seconds to ignore repeat scans of the same code, so one person walking past
       // slowly doesn't get logged twice in a row.
       SCAN_COOLDOWN_SECONDS: 8,
@@ -291,7 +298,7 @@
       params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.province}`, KIOSK_CONFIG.PROVINCE);
       params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.station}`, KIOSK_CONFIG.STATION);
       params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.personnel}`, personnelText);
-      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.dutySchedule}`, 'N/A');
+      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.dutySchedule}`, KIOSK_CONFIG.DEFAULT_DUTY_SCHEDULE);
       params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.timeIn}`, action === 'timeIn' ? timeStr : '');
       params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.timeOut}`, action === 'timeOut' ? timeStr : '');
       params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.status}`, status);
