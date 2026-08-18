@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BFP-NIR ID QR Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen">
+
+  <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-6 py-4">
+    <div class="max-w-5xl mx-auto flex items-center gap-3">
+      <div class="bg-rose-600 p-2.5 rounded-xl text-white font-bold text-xl shadow-lg shadow-rose-600/30">🛡️</div>
+      <div>
+        <h1 class="text-lg font-bold text-white tracking-wide">BFP-NIR ID QR Generator</h1>
+        <p class="text-xs text-slate-400">Generates plain-text QR codes for attendance kiosk scanning — 100% offline, no third-party QR service involved</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto p-6 space-y-8">
+
+    <!-- IMPORTANT NOTE -->
+    <div class="bg-amber-950/40 border-2 border-amber-500/60 rounded-2xl p-5 shadow-xl">
+      <p class="text-amber-200 text-sm font-mono leading-relaxed">
+        <strong class="text-amber-300">Why this matters:</strong> the free QR generators most ID-badge tools use create a
+        <em>link</em> to their own website (a "dynamic" QR), not the actual text. The attendance kiosk needs the
+        person's name encoded <strong>directly</strong> in the QR — no link, no external server. Every code made here
+        is generated entirely in your browser and works even with no internet connection once printed.
+      </p>
+    </div>
+
+    <!-- SINGLE GENERATOR -->
+    <section class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-6 shadow-2xl space-y-4">
+      <h2 class="text-rose-500 font-extrabold text-sm tracking-wider uppercase flex items-center gap-2">
+        <span class="text-lg">🪪</span> Generate a Single ID QR Code
+      </h2>
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input id="singleNameInput" type="text" placeholder="e.g. F01 Earl Joshua T Zamora"
+          class="flex-1 bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-rose-500">
+        <button onclick="generateSingle()" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-3 rounded-xl text-sm font-black uppercase tracking-wide shadow-lg shadow-rose-600/30 transition-colors">
+          Generate QR
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 font-mono">
+        Type exactly the "Rank | Name" text your Personnel Attendance Sheet uses for this person — the kiosk matches on this text exactly.
+      </p>
+
+      <div id="singleResultContainer" class="hidden flex flex-col sm:flex-row items-center gap-6 bg-slate-950 border border-slate-800 rounded-2xl p-6 mt-2">
+        <canvas id="singleQrCanvas" class="bg-white p-3 rounded-xl"></canvas>
+        <div class="flex-1 text-center sm:text-left">
+          <p id="singleResultName" class="text-white font-bold text-lg"></p>
+          <p class="text-xs text-slate-500 font-mono mt-1">This QR encodes the plain text above — no link, works offline.</p>
+          <button onclick="downloadCanvas('singleQrCanvas', currentSingleName)" class="mt-3 bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wide shadow-lg shadow-emerald-600/30 transition-colors">
+            ⬇ Download PNG
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- BATCH GENERATOR -->
+    <section class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-6 shadow-2xl space-y-4">
+      <h2 class="text-rose-500 font-extrabold text-sm tracking-wider uppercase flex items-center gap-2">
+        <span class="text-lg">📋</span> Batch Generate (One Name Per Line)
+      </h2>
+
+      <textarea id="batchNamesInput" rows="6" placeholder="F01 Earl Joshua T Zamora
+FO2 Juan Dela Cruz
+SFO1 Maria Santos
+..."
+        class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-rose-500"></textarea>
+
+      <button onclick="generateBatch()" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-3 rounded-xl text-sm font-black uppercase tracking-wide shadow-lg shadow-rose-600/30 transition-colors">
+        Generate All
+      </button>
+
+      <div id="batchResultsGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-4"></div>
+    </section>
+
+  </main>
+
+  <script>
+    let currentSingleName = '';
+
+    function generateSingle() {
+      const input = document.getElementById('singleNameInput');
+      const name = input.value.trim();
+      if (!name) return;
+
+      currentSingleName = name;
+      const canvas = document.getElementById('singleQrCanvas');
+
+      // encode as plain UTF-8 text — this is the critical part: no URL wrapper,
+      // no redirect service, just the literal string the kiosk expects to read back.
+      QRCode.toCanvas(canvas, name, { width: 220, margin: 2, errorCorrectionLevel: 'H' }, function (error) {
+        if (error) {
+          console.error(error);
+          alert('Could not generate QR code — see console for details.');
+          return;
+        }
+        document.getElementById('singleResultName').textContent = name;
+        document.getElementById('singleResultContainer').classList.remove('hidden');
+      });
+    }
+
+    function generateBatch() {
+      const raw = document.getElementById('batchNamesInput').value;
+      const names = raw.split('\n').map(n => n.trim()).filter(n => n !== '');
+      const grid = document.getElementById('batchResultsGrid');
+      grid.innerHTML = '';
+
+      names.forEach((name, idx) => {
+        const canvasId = `batchQr_${idx}`;
+        const card = document.createElement('div');
+        card.className = 'bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col items-center gap-3 text-center';
+        card.innerHTML = `
+          <canvas id="${canvasId}" class="bg-white p-2 rounded-lg"></canvas>
+          <p class="text-xs font-bold text-white break-words">${escapeHtml(name)}</p>
+          <button class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wide w-full transition-colors">
+            ⬇ Download
+          </button>
+        `;
+        grid.appendChild(card);
+
+        const downloadBtn = card.querySelector('button');
+        downloadBtn.addEventListener('click', () => downloadCanvas(canvasId, name));
+
+        const canvas = document.getElementById(canvasId);
+        QRCode.toCanvas(canvas, name, { width: 150, margin: 2, errorCorrectionLevel: 'H' }, function (error) {
+          if (error) console.error(`Failed to generate QR for "${name}":`, error);
+        });
+      });
+    }
+
+    function downloadCanvas(canvasId, name) {
+      const canvas = document.getElementById(canvasId);
+      const link = document.createElement('a');
+      const safeFileName = name.replace(/[^a-z0-9]+/gi, '_').toLowerCase();
+      link.download = `id_qr_${safeFileName}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    document.getElementById('singleNameInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') generateSingle();
+    });
+  </script>
+</body>
+</html>
