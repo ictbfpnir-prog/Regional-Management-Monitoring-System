@@ -284,59 +284,58 @@
     // Submits a new row via the Google Form's formResponse endpoint. Uses mode:'no-cors'
     // because Google Forms doesn't return CORS headers for this — we can't read the
     // response, only fire the submission, which is the standard approach for this.
+    // Submits a new row reliably using a hidden form + iframe target
     async function submitAttendance(personnelText, action) {
       const now = new Date();
       const hour = now.getHours();
       const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
       const status = action === 'timeIn' ? (hour >= KIOSK_CONFIG.LATE_AFTER_HOUR ? 'Late' : 'Present') : 'Present';
 
-      // Google Forms' submission endpoint expects a standard HTML form POST —
-      // application/x-www-form-urlencoded. FormData sends multipart/form-data instead,
-      // which Google's endpoint can silently accept without actually recording the
-      // response. URLSearchParams matches what a real form submit sends.
-      const params = new URLSearchParams();
-      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.province}`, KIOSK_CONFIG.PROVINCE);
-      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.station}`, KIOSK_CONFIG.STATION);
-      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.personnel}`, personnelText);
-      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.dutySchedule}`, KIOSK_CONFIG.DEFAULT_DUTY_SCHEDULE);
-      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.timeIn}`, action === 'timeIn' ? timeStr : '');
-      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.timeOut}`, action === 'timeOut' ? timeStr : '');
-      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.status}`, status);
-      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.leaveType}`, 'N/A');
-      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.remarks}`, 'Logged via QR kiosk');
+      // Create a hidden iframe target if it doesn't already exist
+      let iframe = document.getElementById('hiddenFormTarget');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.name = 'hiddenFormTarget';
+        iframe.id = 'hiddenFormTarget';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+      }
 
-      await fetch(KIOSK_CONFIG.FORM_ACTION_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params.toString()
-      });
-    }
+      // Create a dynamic form that posts directly to the Google Form action URL
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = KIOSK_CONFIG.FORM_ACTION_URL;
+      form.target = 'hiddenFormTarget';
+      form.style.display = 'none';
 
-    function showConfirmation({ success, title, name, meta }) {
-      const overlay = document.getElementById('confirmationOverlay');
-      const ring = document.getElementById('confirmationIconRing');
-      const titleEl = document.getElementById('confirmationTitle');
-      const nameEl = document.getElementById('confirmationName');
-      const metaEl = document.getElementById('confirmationMeta');
+      const fields = {
+        [`entry.${KIOSK_CONFIG.ENTRY_IDS.province}`]: KIOSK_CONFIG.PROVINCE,
+        [`entry.${KIOSK_CONFIG.ENTRY_IDS.station}`]: KIOSK_CONFIG.STATION,
+        [`entry.${KIOSK_CONFIG.ENTRY_IDS.personnel}`]: personnelText,
+        [`entry.${KIOSK_CONFIG.ENTRY_IDS.dutySchedule}`]: KIOSK_CONFIG.DEFAULT_DUTY_SCHEDULE,
+        [`entry.${KIOSK_CONFIG.ENTRY_IDS.timeIn}`]: action === 'timeIn' ? timeStr : '',
+        [`entry.${KIOSK_CONFIG.ENTRY_IDS.timeOut}`]: action === 'timeOut' ? timeStr : '',
+        [`entry.${KIOSK_CONFIG.ENTRY_IDS.status}`]: status,
+        [`entry.${KIOSK_CONFIG.ENTRY_IDS.leaveType}`]: 'N/A',
+        [`entry.${KIOSK_CONFIG.ENTRY_IDS.remarks}`]: 'Logged via QR kiosk'
+      };
 
-      ring.textContent = success ? '✅' : '⚠️';
-      ring.className = success
-        ? 'pulse-ring w-20 h-20 mx-auto rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center text-4xl'
-        : 'w-20 h-20 mx-auto rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center text-4xl';
-      titleEl.textContent = title;
-      titleEl.className = success ? 'text-lg font-black uppercase tracking-wider text-white' : 'text-lg font-black uppercase tracking-wider text-amber-300';
-      nameEl.textContent = name;
-      metaEl.textContent = meta;
+      for (const [key, value] of Object.entries(fields)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      }
 
-      overlay.classList.remove('hidden');
-      document.getElementById('scannerStatus').textContent = 'Point ID QR code at the camera to log Time In / Time Out';
-
+      document.body.appendChild(form);
+      form.submit();
+      
+      // Clean up form element after submission trigger
       setTimeout(() => {
-        overlay.classList.add('hidden');
-      }, KIOSK_CONFIG.CONFIRMATION_DISPLAY_MS);
+        form.remove();
+      }, 1000);
     }
-
     startCamera();
   </script>
 </body>
