@@ -283,21 +283,26 @@
       const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
       const status = action === 'timeIn' ? (hour >= KIOSK_CONFIG.LATE_AFTER_HOUR ? 'Late' : 'Present') : 'Present';
 
-      const formData = new FormData();
-      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.province}`, KIOSK_CONFIG.PROVINCE);
-      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.station}`, KIOSK_CONFIG.STATION);
-      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.personnel}`, personnelText);
-      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.dutySchedule}`, 'N/A');
-      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.timeIn}`, action === 'timeIn' ? timeStr : '');
-      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.timeOut}`, action === 'timeOut' ? timeStr : '');
-      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.status}`, status);
-      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.leaveType}`, 'N/A');
-      formData.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.remarks}`, 'Logged via QR kiosk');
+      // Google Forms' submission endpoint expects a standard HTML form POST —
+      // application/x-www-form-urlencoded. FormData sends multipart/form-data instead,
+      // which Google's endpoint can silently accept without actually recording the
+      // response. URLSearchParams matches what a real form submit sends.
+      const params = new URLSearchParams();
+      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.province}`, KIOSK_CONFIG.PROVINCE);
+      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.station}`, KIOSK_CONFIG.STATION);
+      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.personnel}`, personnelText);
+      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.dutySchedule}`, 'N/A');
+      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.timeIn}`, action === 'timeIn' ? timeStr : '');
+      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.timeOut}`, action === 'timeOut' ? timeStr : '');
+      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.status}`, status);
+      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.leaveType}`, 'N/A');
+      params.append(`entry.${KIOSK_CONFIG.ENTRY_IDS.remarks}`, 'Logged via QR kiosk');
 
       await fetch(KIOSK_CONFIG.FORM_ACTION_URL, {
         method: 'POST',
         mode: 'no-cors',
-        body: formData
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
       });
     }
 
