@@ -45,14 +45,25 @@
       </div>
     </div>
 
-    <!-- STYLIZED DATE & TIME DISPLAY -->
-    <div class="flex items-center gap-3 bg-slate-950 border border-slate-800/90 px-5 py-2.5 rounded-2xl shadow-xl shadow-slate-950/60 ring-1 ring-slate-800">
-      <div class="flex items-center gap-2">
-        <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
+    <div class="flex items-center gap-3">
+      <!-- DATA SYNC STATUS BADGE -->
+      <div id="dataStatusBadge" class="flex items-center gap-2.5 bg-slate-950 border border-slate-800/90 px-4 py-2.5 rounded-2xl shadow-xl shadow-slate-950/60 ring-1 ring-slate-800 transition-colors duration-300">
+        <span id="dataStatusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)] flex-shrink-0"></span>
+        <div class="leading-tight">
+          <div id="dataStatusLabel" class="text-[11px] font-black uppercase tracking-wider text-emerald-400">Connecting…</div>
+          <div id="dataStatusSub" class="text-[10px] font-mono text-slate-500">Awaiting first sync</div>
+        </div>
       </div>
-      <span id="liveDateTime" class="text-sm md:text-base font-extrabold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-cyan-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.3)]">
-        LOADING DATE & TIME...
-      </span>
+
+      <!-- STYLIZED DATE & TIME DISPLAY -->
+      <div class="flex items-center gap-3 bg-slate-950 border border-slate-800/90 px-5 py-2.5 rounded-2xl shadow-xl shadow-slate-950/60 ring-1 ring-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
+        </div>
+        <span id="liveDateTime" class="text-sm md:text-base font-extrabold uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-cyan-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.3)]">
+          LOADING DATE & TIME...
+        </span>
+      </div>
     </div>
   </header>
 
@@ -76,6 +87,13 @@
           <button data-section="fire-ops" class="section-btn w-full flex items-center justify-between p-4 rounded-xl text-slate-300 border border-slate-800/80 hover:border-rose-500/40 hover:bg-slate-800/70 hover:text-white hover:translate-x-1.5 transition-all duration-300 group">
             <span class="flex items-center gap-3.5 font-bold text-base tracking-wide group-hover:text-rose-300 transition-colors">
               <span class="text-xl opacity-80 group-hover:opacity-100 transition-opacity">📊</span> Operational Status
+            </span>
+            <span class="bg-emerald-600/30 text-emerald-200 border border-emerald-500/40 px-2.5 py-1 rounded-md text-xs font-mono font-bold shadow-inner">DAILY</span>
+          </button>
+
+          <button data-section="personnel-attendance" class="section-btn w-full flex items-center justify-between p-4 rounded-xl text-slate-300 border border-slate-800/80 hover:border-rose-500/40 hover:bg-slate-800/70 hover:text-white hover:translate-x-1.5 transition-all duration-300 group">
+            <span class="flex items-center gap-3.5 font-bold text-base tracking-wide group-hover:text-rose-300 transition-colors">
+              <span class="text-xl opacity-80 group-hover:opacity-100 transition-opacity">🕒</span> Personnel Attendance
             </span>
             <span class="bg-emerald-600/30 text-emerald-200 border border-emerald-500/40 px-2.5 py-1 rounded-md text-xs font-mono font-bold shadow-inner">DAILY</span>
           </button>
@@ -143,7 +161,7 @@
               <span id="responseAlertIcon" class="text-4xl">⏳</span>
               <div>
                 <h3 id="responseAlertTitle" class="text-white font-black text-lg md:text-xl tracking-wider uppercase drop-shadow">
-                  NEW RESPONSE ALERT
+                  NEW RESPONSE ALERT — STANDBY FOR INCOMING DISPATCH
                 </h3>
                 <p id="responseAlertSub" class="text-sm text-slate-300 font-mono font-bold mt-1">MONITORING LIVE FEED FOR REAL-TIME EMERGENCY DISPATCHES...</p>
               </div>
@@ -185,6 +203,17 @@
         </div>
       </div>
 
+      <!-- PERSONNEL ATTENDANCE WIDGET CONTAINER -->
+      <div id="sectionWidgetContainer-personnel-attendance" class="section-exclusive-widget hidden">
+        <div class="bg-slate-900/95 border-2 border-slate-800 rounded-3xl p-6 shadow-2xl backdrop-blur-xl flex items-center gap-4">
+          <span class="text-3xl">🕒</span>
+          <div>
+            <h3 class="text-white font-black text-base md:text-lg tracking-wider uppercase">Personnel Attendance Monitoring</h3>
+            <p class="text-xs text-slate-400 font-mono">Daily time-in/out, roster vs. actual attendance, leave & absence tracking across NIR stations</p>
+          </div>
+        </div>
+      </div>
+
       <!-- GENERIC UNDER CONSTRUCTION WIDGET CONTAINER FOR OTHER SECTIONS -->
       <div id="sectionWidgetContainer-generic" class="section-exclusive-widget hidden">
         <div class="bg-gradient-to-br from-slate-900 via-slate-900/90 to-amber-950/20 border-2 border-amber-500/40 rounded-3xl p-10 shadow-2xl text-center relative overflow-hidden">
@@ -221,10 +250,33 @@
             </button>
           </div>
 
+          <div id="attendanceSubTabsContainer" class="hidden flex items-center gap-2 bg-slate-900/90 p-2 rounded-2xl border border-slate-800 shadow-xl w-fit">
+            <button data-attendance-tab="today" class="attendance-tab-btn px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 bg-rose-600 text-white shadow-md shadow-rose-600/30">
+              📋 Today's SITREP
+            </button>
+            <button data-attendance-tab="trend" class="attendance-tab-btn px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/80">
+              📈 Attendance Trend
+            </button>
+            <button data-attendance-tab="leave" class="attendance-tab-btn px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800/80">
+              🗓️ Leave & Absences
+            </button>
+          </div>
+
           <!-- REPORTING STATIONS COUNT BADGE (MATCHING SUBSECTION SIZE/STYLE) -->
           <div id="reportingStationsBadgeContainer" class="hidden bg-slate-900/90 px-4 py-2 rounded-2xl border border-slate-800 shadow-xl items-center gap-2.5">
             <span class="text-xs font-black uppercase tracking-wider text-slate-400">🏢 Reporting Stations:</span>
             <span id="reportingStationsCountVal" class="text-xs font-black font-mono text-sky-400">0</span>
+          </div>
+        </div>
+
+        <!-- COLUMN MAPPING WARNING (shown when an expected Sheet column can't be found) -->
+        <div id="columnMappingWarning" class="hidden bg-amber-950/40 border-2 border-amber-500/60 rounded-2xl p-4 shadow-xl">
+          <div class="flex items-start gap-3">
+            <span class="text-2xl flex-shrink-0">⚠️</span>
+            <div>
+              <h4 class="text-amber-300 font-black text-xs uppercase tracking-wider mb-1">Column Mapping Warning — Some totals may be understated</h4>
+              <p id="columnMappingWarningDetail" class="text-amber-100/90 text-xs font-mono leading-relaxed"></p>
+            </div>
           </div>
         </div>
 
@@ -451,6 +503,21 @@
         icon: '📊',
         isUnderConstruction: false,
 
+        // Fields this section's math depends on. If any keyword set fails to match
+        // a column, the corresponding number silently defaults to 0 in the totals —
+        // so we check for these explicitly and surface a warning instead of failing silent.
+        criticalFields: [
+          { label: "Total Strength", keywords: ["total strength of personnel", "include marshal"] },
+          { label: "On-Duty (Operations)", keywords: ["no. of on-duty personnel (operations)"] },
+          { label: "On-Duty (Admin/Daily)", keywords: ["no. of on-duty personnel (admin/daily duty)"] },
+          { label: "Total Fire Trucks", keywords: ["total truck", "total trucks"] },
+          { label: "Actual Operational Trucks", keywords: ["actual operational", "actual"] },
+          { label: "Unserviceable Trucks", keywords: ["unserviceable"] },
+          { label: "Total Ambulances", keywords: ["ambulance", "total ambulance", "ambulances"] },
+          { label: "Operational Ambulances", keywords: ["serviceable ambulance", "operational ambulance"] },
+          { label: "Unserviceable Ambulances", keywords: ["unserviceable ambulance"] }
+        ],
+
         cleanData: function(rawHeaders, rawRows) {
           const provIndices = [];
           const stationIndices = [];
@@ -547,8 +614,11 @@
           const truckReadinessRate = sumTotalTrucks > 0 ? ((sumActualOp / sumTotalTrucks) * 100).toFixed(1) : "0.0";
           const ambulanceReadinessRate = sumTotalAmb > 0 ? ((sumActualAmb / sumTotalAmb) * 100).toFixed(1) : "0.0";
 
-          const unserviceableCardBorder = stationsWithUnserviceableTabFilterActive ? "border-red-400 ring-2 ring-red-500" : "border-rose-500/70";
-          const unserviceableCardBg = stationsWithUnserviceableTabFilterActive ? "from-red-950 via-rose-950 to-slate-900" : "from-rose-950/50 via-slate-900/90 to-slate-950";
+          const unserviceableCardBorder = stationsWithUnserviceableTabFilterActive === 'truck' ? "border-red-400 ring-2 ring-red-500" : "border-rose-500/70";
+          const unserviceableCardBg = stationsWithUnserviceableTabFilterActive === 'truck' ? "from-red-950 via-rose-950 to-slate-900" : "from-rose-950/50 via-slate-900/90 to-slate-950";
+
+          const unserviceableAmbCardBorder = stationsWithUnserviceableTabFilterActive === 'ambulance' ? "border-red-400 ring-2 ring-red-500" : "border-rose-500/70";
+          const unserviceableAmbCardBg = stationsWithUnserviceableTabFilterActive === 'ambulance' ? "from-red-950 via-rose-950 to-slate-900" : "from-rose-950/50 via-slate-900/90 to-slate-950";
 
           if (currentOpsSubTab === 'personnel') {
             return {
@@ -567,7 +637,7 @@
                 { label: "🚚 TOTAL FIRE TRUCKS", count: sumTotalTrucks.toLocaleString(), color: "text-teal-400", border: "border-teal-500/50", bg: "from-teal-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(45,212,191,0.4)]", clickable: false },
                 { label: "✅ OPERATIONAL FIRETRUCKS", count: sumActualOp.toLocaleString(), color: "text-emerald-400", border: "border-emerald-500/50", bg: "from-emerald-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]", clickable: false },
                 { 
-                  label: stationsWithUnserviceableTabFilterActive ? "🛠️ UNSERVICEABLE TRUCKS (FILTERED ACTIVE)" : "🛠️ UNSERVICEABLE TRUCKS (CLICK TO FILTER)", 
+                  label: stationsWithUnserviceableTabFilterActive === 'truck' ? "🛠️ UNSERVICEABLE TRUCKS (FILTERED ACTIVE)" : "🛠️ UNSERVICEABLE TRUCKS (CLICK TO FILTER)", 
                   count: sumUnserviceable.toLocaleString(), 
                   color: "text-rose-400", 
                   border: unserviceableCardBorder, 
@@ -575,13 +645,23 @@
                   glow: "drop-shadow-[0_0_15px_rgba(244,63,94,0.5)]", 
                   pulse: sumUnserviceable > 0,
                   clickable: true,
-                  action: "toggleUnserviceableFilter"
+                  action: "toggleUnserviceableFilterTruck"
                 },
                 { label: "📈 FIRETRUCK READINESS RATE", count: `${truckReadinessRate}%`, color: parseFloat(truckReadinessRate) >= 80 ? "text-emerald-400" : "text-amber-400", border: "border-teal-500/50", bg: "from-teal-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(45,212,191,0.4)]", clickable: false },
                 { label: "🚑 TOTAL AMBULANCES", count: sumTotalAmb.toLocaleString(), color: "text-cyan-400", border: "border-cyan-500/50", bg: "from-cyan-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]", clickable: false },
                 { label: "🟢 OPERATIONAL AMBULANCE", count: sumActualAmb.toLocaleString(), color: "text-emerald-400", border: "border-emerald-500/50", bg: "from-emerald-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]", clickable: false },
-                { label: "🛠️ UNSERVICEABLE AMBULANCES", count: sumUnservAmb.toLocaleString(), color: "text-rose-400", border: "border-rose-500/50", bg: "from-rose-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(244,63,94,0.4)]", clickable: false },
-                { label: "📈 AMBULANCE READINESS RATE", count: `${ambulanceReadinessRate}%`, color: parseFloat(ambulanceReadinessRate) >= 80 ? "text-emerald-400" : "text-amber-400", border: "border-teal-500/50", bg: "from-teal-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(45,212,191,0.4)]", clickable: false }
+                { 
+                  label: stationsWithUnserviceableTabFilterActive === 'ambulance' ? "🛠️ UNSERVICEABLE AMBULANCES (FILTERED ACTIVE)" : "🛠️ UNSERVICEABLE AMBULANCES (CLICK TO FILTER)", 
+                  count: sumUnservAmb.toLocaleString(), 
+                  color: "text-rose-400", 
+                  border: unserviceableAmbCardBorder, 
+                  bg: unserviceableAmbCardBg, 
+                  glow: "drop-shadow-[0_0_15px_rgba(244,63,94,0.4)]", 
+                  pulse: sumUnservAmb > 0,
+                  clickable: true,
+                  action: "toggleUnserviceableFilterAmbulance"
+                },
+                { label: "📈 EMS READINESS RATE", count: `${ambulanceReadinessRate}%`, color: parseFloat(ambulanceReadinessRate) >= 80 ? "text-emerald-400" : "text-amber-400", border: "border-teal-500/50", bg: "from-teal-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(45,212,191,0.4)]", clickable: false }
               ]
             };
           } else {
@@ -606,7 +686,7 @@
                     { label: "TOTAL FIRE TRUCKS", count: sumTotalTrucks.toLocaleString(), color: "text-teal-400", border: "border-teal-500/50", bg: "from-teal-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(45,212,191,0.4)]", clickable: false },
                     { label: "OPERATIONAL FIRETRUCKS", count: sumActualOp.toLocaleString(), color: "text-emerald-400", border: "border-emerald-500/50", bg: "from-emerald-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]", clickable: false },
                     { 
-                      label: stationsWithUnserviceableTabFilterActive ? "UNSERVICEABLE TRUCKS (FILTERED ACTIVE)" : "UNSERVICEABLE TRUCKS (CLICK TO FILTER)", 
+                      label: stationsWithUnserviceableTabFilterActive === 'truck' ? "UNSERVICEABLE TRUCKS (FILTERED ACTIVE)" : "UNSERVICEABLE TRUCKS (CLICK TO FILTER)", 
                       count: sumUnserviceable.toLocaleString(), 
                       color: "text-rose-400", 
                       border: unserviceableCardBorder, 
@@ -614,19 +694,29 @@
                       glow: "drop-shadow-[0_0_15px_rgba(244,63,94,0.5)]", 
                       pulse: sumUnserviceable > 0,
                       clickable: true,
-                      action: "toggleUnserviceableFilter"
+                      action: "toggleUnserviceableFilterTruck"
                     },
                     { label: "FIRETRUCK READINESS RATE", count: `${truckReadinessRate}%`, color: parseFloat(truckReadinessRate) >= 80 ? "text-emerald-400" : "text-amber-400", border: "border-teal-500/50", bg: "from-teal-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(45,212,191,0.4)]", clickable: false }
                   ]
                 },
                 {
-                  title: "🚑 AMBULANCES",
+                  title: "🚑 EMERGENCY MEDICAL SERVICES (EMS) & AMBULANCES",
                   gridClass: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4",
                   cards: [
                     { label: "TOTAL AMBULANCES", count: sumTotalAmb.toLocaleString(), color: "text-cyan-400", border: "border-cyan-500/50", bg: "from-cyan-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]", clickable: false },
                     { label: "OPERATIONAL AMBULANCE", count: sumActualAmb.toLocaleString(), color: "text-emerald-400", border: "border-emerald-500/50", bg: "from-emerald-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]", clickable: false },
-                    { label: "UNSERVICEABLE AMBULANCES", count: sumUnservAmb.toLocaleString(), color: "text-rose-400", border: "border-rose-500/50", bg: "from-rose-950/50 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(244,63,94,0.4)]", clickable: false },
-                    { label: "AMBULANCE READINESS RATE", count: `${ambulanceReadinessRate}%`, color: parseFloat(ambulanceReadinessRate) >= 80 ? "text-emerald-400" : "text-amber-400", border: "border-teal-500/50", bg: "from-teal-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(45,212,191,0.4)]", clickable: false }
+                    { 
+                      label: stationsWithUnserviceableTabFilterActive === 'ambulance' ? "UNSERVICEABLE AMBULANCES (FILTERED ACTIVE)" : "UNSERVICEABLE AMBULANCES (CLICK TO FILTER)", 
+                      count: sumUnservAmb.toLocaleString(), 
+                      color: "text-rose-400", 
+                      border: unserviceableAmbCardBorder, 
+                      bg: unserviceableAmbCardBg, 
+                      glow: "drop-shadow-[0_0_15px_rgba(244,63,94,0.4)]", 
+                      pulse: sumUnservAmb > 0,
+                      clickable: true,
+                      action: "toggleUnserviceableFilterAmbulance"
+                    },
+                    { label: "EMS READINESS RATE", count: `${ambulanceReadinessRate}%`, color: parseFloat(ambulanceReadinessRate) >= 80 ? "text-emerald-400" : "text-amber-400", border: "border-teal-500/50", bg: "from-teal-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(45,212,191,0.4)]", clickable: false }
                   ]
                 }
               ]
@@ -641,7 +731,161 @@
         getWidgetContainerId: () => "sectionWidgetContainer-fire-ops"
       },
 
-      // --- 3. UNDER CONSTRUCTION SECTIONS ---
+      // --- 3. PERSONNEL ATTENDANCE SECTION ---
+      'personnel-attendance': {
+        // TODO: replace with your real Sheet ID + gid once the attendance Form/Sheet is created.
+        // Expected columns (from the Google Form): Timestamp, Province, Station, Rank | Name,
+        // Duty Schedule, Time In, Time Out, Attendance Status, Leave Type, Remarks
+        sheetId: '1XFulUk7DbEMVA-DpHYPFxTb-gifxGg28SMJpifFXeWk',
+        gid: '1897751193',
+        title: 'Personnel Attendance',
+        icon: '🕒',
+        isUnderConstruction: false,
+
+        criticalFields: [
+          { label: "Timestamp", keywords: ["timestamp"] },
+          { label: "Attendance Status", keywords: ["attendance status", "status"] },
+          { label: "Time In", keywords: ["time in"] },
+          { label: "Time Out", keywords: ["time out"] }
+        ],
+
+        cleanData: function(rawHeaders, rawRows) {
+          const provIndices = [];
+          const stationIndices = [];
+          const excludeIndices = [];
+
+          rawHeaders.forEach((h, idx) => {
+            const lower = h.toLowerCase().trim();
+            if (lower.includes("province") || lower.includes("select province")) provIndices.push(idx);
+            if (lower.includes("select station") || lower === "station") stationIndices.push(idx);
+            if (lower.includes("upload") || lower.includes("file") || lower.includes("image") || lower.includes("photo")) excludeIndices.push(idx);
+          });
+
+          const cleanHeaders = [];
+          const indexMapping = [];
+          let provMerged = false, stationMerged = false;
+
+          rawHeaders.forEach((h, idx) => {
+            if (excludeIndices.includes(idx)) return;
+            const lower = h.toLowerCase().trim();
+
+            if (provIndices.includes(idx)) {
+              if (!provMerged) { cleanHeaders.push("PROVINCE"); indexMapping.push(provIndices); provMerged = true; }
+            } else if (stationIndices.includes(idx)) {
+              if (!stationMerged) { cleanHeaders.push("STATION"); indexMapping.push(stationIndices); stationMerged = true; }
+            } else {
+              let headerName = h;
+              if (lower.includes("rank | name") || lower === "name") headerName = "PERSONNEL";
+              else if (lower.includes("duty schedule") || lower.includes("shift")) headerName = "DUTY SCHEDULE";
+              else if (lower.includes("time in")) headerName = "TIME IN";
+              else if (lower.includes("time out")) headerName = "TIME OUT";
+              else if (lower.includes("attendance status") || lower === "status") headerName = "STATUS";
+              else if (lower.includes("leave type")) headerName = "LEAVE TYPE";
+              cleanHeaders.push(headerName);
+              indexMapping.push([idx]);
+            }
+          });
+
+          const mappedRows = rawRows.map(row => indexMapping.map(mapArray => {
+            for (let colIdx of mapArray) {
+              const val = row[colIdx] ? row[colIdx].trim() : '';
+              if (val !== '') return val;
+            }
+            return '';
+          }));
+
+          return { cleanHeaders, cleanRows: mappedRows };
+        },
+
+        filterRows: function(rows, headers) {
+          const tsIdx = findColumnIndex(headers, ["timestamp"]);
+          if (currentAttendanceSubTab === 'trend') return rows; // trend needs all dates, not just today
+          if (currentAttendanceSubTab === 'leave') {
+            const statusIdx = findColumnIndex(headers, ["status"]);
+            return rows.filter(r => {
+              const s = (statusIdx !== -1 ? r[statusIdx] : '').toLowerCase();
+              return s.includes("absent") || s.includes("leave");
+            });
+          }
+          // 'today' (default): today's log only
+          return tsIdx !== -1 ? rows.filter(r => isToday(r[tsIdx])) : rows;
+        },
+
+        renderWidgets: function(headers, dataRows) {
+          const statusIdx = findColumnIndex(headers, ["status"]);
+          const leaveTypeIdx = findColumnIndex(headers, ["leave type"]);
+
+          if (currentAttendanceSubTab === 'trend') {
+            const tsIdx = findColumnIndex(headers, ["timestamp"]);
+            const dateMap = {}; // date string -> { present, total }
+            dataRows.forEach(row => {
+              const raw = tsIdx !== -1 ? row[tsIdx] : '';
+              if (!raw) return;
+              const d = new Date(raw);
+              const dateKey = isNaN(d.getTime()) ? raw.split(' ')[0] : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              if (!dateMap[dateKey]) dateMap[dateKey] = { present: 0, total: 0 };
+              const status = (statusIdx !== -1 ? row[statusIdx] : '').toLowerCase();
+              dateMap[dateKey].total++;
+              if (status.includes("present") || status.includes("late")) dateMap[dateKey].present++;
+            });
+            const dates = Object.keys(dateMap).slice(-7);
+            const avgRate = dates.length > 0
+              ? (dates.reduce((sum, d) => sum + (dateMap[d].total > 0 ? (dateMap[d].present / dateMap[d].total) * 100 : 0), 0) / dates.length).toFixed(1)
+              : "0.0";
+
+            return {
+              type: 'flat',
+              cards: [
+                { label: "📈 7-DAY AVG ATTENDANCE RATE", count: `${avgRate}%`, color: parseFloat(avgRate) >= 80 ? "text-emerald-400" : "text-amber-400", border: "border-indigo-500/50", bg: "from-indigo-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(129,140,248,0.4)]", clickable: false },
+                { label: "🗓️ REPORTING DATES LOGGED", count: dates.length.toLocaleString(), color: "text-sky-400", border: "border-sky-500/50", bg: "from-sky-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(56,189,248,0.4)]", clickable: false }
+              ]
+            };
+          }
+
+          if (currentAttendanceSubTab === 'leave') {
+            const leaveCounts = {};
+            dataRows.forEach(row => {
+              const type = leaveTypeIdx !== -1 && row[leaveTypeIdx] ? row[leaveTypeIdx] : "Unspecified";
+              leaveCounts[type] = (leaveCounts[type] || 0) + 1;
+            });
+            const cards = Object.keys(leaveCounts).map(type => ({
+              label: `🗓️ ${type.toUpperCase()}`, count: leaveCounts[type].toLocaleString(), color: "text-amber-400", border: "border-amber-500/50", bg: "from-amber-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(251,191,36,0.4)]", clickable: false
+            }));
+            cards.unshift({ label: "🚫 TOTAL ABSENT/ON LEAVE", count: dataRows.length.toLocaleString(), color: "text-rose-400", border: "border-rose-500/70", bg: "from-rose-950/50 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(244,63,94,0.5)]", clickable: false });
+            return { type: 'flat', cards };
+          }
+
+          // default: 'today'
+          let present = 0, late = 0, absent = 0, onLeave = 0;
+          dataRows.forEach(row => {
+            const status = (statusIdx !== -1 ? row[statusIdx] : '').toLowerCase();
+            if (status.includes("late")) late++;
+            else if (status.includes("present")) present++;
+            else if (status.includes("leave")) onLeave++;
+            else if (status.includes("absent")) absent++;
+          });
+          const totalLogged = dataRows.length;
+          const attendanceRate = totalLogged > 0 ? (((present + late) / totalLogged) * 100).toFixed(1) : "0.0";
+
+          return {
+            type: 'flat',
+            cards: [
+              { label: "📋 TOTAL PERSONNEL LOGGED", count: totalLogged.toLocaleString(), color: "text-sky-400", border: "border-sky-500/50", bg: "from-sky-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(56,189,248,0.4)]", clickable: false },
+              { label: "✅ PRESENT", count: present.toLocaleString(), color: "text-emerald-400", border: "border-emerald-500/50", bg: "from-emerald-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]", clickable: false },
+              { label: "⏰ LATE", count: late.toLocaleString(), color: "text-amber-400", border: "border-amber-500/50", bg: "from-amber-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(251,191,36,0.4)]", clickable: false },
+              { label: "🚫 ABSENT", count: absent.toLocaleString(), color: "text-rose-400", border: "border-rose-500/50", bg: "from-rose-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(244,63,94,0.4)]", clickable: false },
+              { label: "🗓️ ON LEAVE", count: onLeave.toLocaleString(), color: "text-orange-400", border: "border-orange-500/50", bg: "from-orange-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(249,115,22,0.4)]", clickable: false },
+              { label: "📈 ATTENDANCE RATE", count: `${attendanceRate}%`, color: parseFloat(attendanceRate) >= 80 ? "text-emerald-400" : "text-amber-400", border: "border-indigo-500/50", bg: "from-indigo-950/30 via-slate-900/90 to-slate-950", glow: "drop-shadow-[0_0_15px_rgba(129,140,248,0.4)]", clickable: false }
+            ]
+          };
+        },
+
+        onLiveFeedUpdate: function() {},
+
+        getWidgetContainerId: () => "sectionWidgetContainer-personnel-attendance"
+      },
+
+      // --- 4. UNDER CONSTRUCTION SECTIONS ---
       'logistics': createUnderConstructionConfig('Logistics & Infrastructure', '🔧', 'Logistics Inventory, Supply Chains, and Facilities Telemetry'),
       'fses': createUnderConstructionConfig('Fire Safety Enforcement', '📜', 'Fire Clearance Tracking, Inspection Logs, and Code Compliance'),
       'ict': createUnderConstructionConfig('ICT & Cyber Operations', '📡', 'Starlink Network Health, Node Latency, and Cyber Asset Security'),
@@ -671,7 +915,8 @@
     let currentProvinceFilter = 'ALL';
     let currentSelectedStation = 'ALL';
     let currentOpsSubTab = 'overview';
-    let stationsWithUnserviceableTabFilterActive = false;
+    let currentAttendanceSubTab = 'today';
+    let stationsWithUnserviceableTabFilterActive = false; // 'truck', 'ambulance', or false
     let globalHeaders = [];
     let processedHeaders = [];
     let processedRows = [];
@@ -681,6 +926,11 @@
     let bannerTimeout = null;
     let responseWidgetClearTimeout = null;
     let responseWidgetInterval = null;
+
+    // --- DATA SYNC STATUS TRACKING ---
+    let lastSuccessfulFetch = null;   // Date of last successful data pull
+    let consecutiveFetchFailures = 0; // Count of back-to-back failed fetches
+    let lastFetchError = null;        // Most recent error message, for the sub-label
 
     function unlockAudioSystem() {
       try {
@@ -736,6 +986,56 @@
       if (clockElement) clockElement.textContent = now.toLocaleString('en-US', options).toUpperCase();
     }
 
+    // Renders the data-sync status badge next to the clock.
+    // Called every second so "time since last sync" stays accurate even between polls,
+    // and immediately after every fetch attempt (success or failure).
+    function updateDataStatusBadge() {
+      const dot = document.getElementById('dataStatusDot');
+      const label = document.getElementById('dataStatusLabel');
+      const sub = document.getElementById('dataStatusSub');
+      if (!dot || !label || !sub) return;
+
+      const dotClasses = "w-2.5 h-2.5 rounded-full flex-shrink-0";
+
+      if (!lastSuccessfulFetch) {
+        // Never successfully synced yet
+        if (consecutiveFetchFailures > 0) {
+          dot.className = `${dotClasses} bg-rose-500 animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.9)]`;
+          label.textContent = "CONNECTION FAILED";
+          label.className = "text-[11px] font-black uppercase tracking-wider text-rose-400";
+          sub.textContent = lastFetchError ? `Never synced — ${lastFetchError}` : "Never synced — retrying…";
+        } else {
+          dot.className = `${dotClasses} bg-amber-400 animate-pulse shadow-[0_0_10px_rgba(251,191,36,0.8)]`;
+          label.textContent = "CONNECTING…";
+          label.className = "text-[11px] font-black uppercase tracking-wider text-amber-400";
+          sub.textContent = "Awaiting first sync";
+        }
+        return;
+      }
+
+      const secsAgo = Math.floor((Date.now() - lastSuccessfulFetch.getTime()) / 1000);
+      const agoText = secsAgo < 60 ? `${secsAgo}s ago` : `${Math.floor(secsAgo / 60)}m ${secsAgo % 60}s ago`;
+
+      if (consecutiveFetchFailures > 0) {
+        // Was live, now failing — most dangerous state for an ops dashboard: make it loud
+        dot.className = `${dotClasses} bg-rose-500 animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.9)]`;
+        label.textContent = "SYNC FAILING";
+        label.className = "text-[11px] font-black uppercase tracking-wider text-rose-400";
+        sub.textContent = `Data may be stale — last update ${agoText}`;
+      } else if (secsAgo > 60) {
+        // Fetch is "succeeding" per the log but hasn't landed in a while — flag as stale
+        dot.className = `${dotClasses} bg-amber-400 animate-pulse shadow-[0_0_10px_rgba(251,191,36,0.8)]`;
+        label.textContent = "DATA STALE";
+        label.className = "text-[11px] font-black uppercase tracking-wider text-amber-400";
+        sub.textContent = `Last update ${agoText}`;
+      } else {
+        dot.className = `${dotClasses} bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]`;
+        label.textContent = "LIVE";
+        label.className = "text-[11px] font-black uppercase tracking-wider text-emerald-400";
+        sub.textContent = `Synced ${agoText}`;
+      }
+    }
+
     function parseCsvLine(text) {
       const result = [];
       let cell = '', inQuotes = false;
@@ -759,6 +1059,30 @@
       return headers.findIndex(h => keywords.some(k => h.toLowerCase().includes(k.toLowerCase())));
     }
 
+    // Checks the current section's declared criticalFields against the cleaned headers.
+    // Any field whose keywords fail to match a column is a silent-zero risk — this makes
+    // it visible instead of letting a renamed Sheet column quietly deflate the totals.
+    function checkColumnMapping(headers) {
+      const config = SECTIONS[currentSectionKey];
+      const warningBox = document.getElementById("columnMappingWarning");
+      const warningDetail = document.getElementById("columnMappingWarningDetail");
+      if (!warningBox || !warningDetail) return;
+
+      if (!config || !config.criticalFields || config.criticalFields.length === 0) {
+        warningBox.classList.add("hidden");
+        return;
+      }
+
+      const missing = config.criticalFields.filter(field => findColumnIndex(headers, field.keywords) === -1);
+
+      if (missing.length === 0) {
+        warningBox.classList.add("hidden");
+      } else {
+        warningDetail.textContent = `Could not find a matching Sheet column for: ${missing.map(f => f.label).join(", ")}. These figures are currently showing as 0 in the totals below — check that the column headers in the Sheet haven't been renamed or reordered.`;
+        warningBox.classList.remove("hidden");
+      }
+    }
+
     function isToday(dateString) {
       if (!dateString) return false;
       const rowDate = new Date(dateString);
@@ -779,7 +1103,7 @@
 
       widget.className = "bg-slate-900/95 border-2 border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-xl transition-all duration-300 relative";
       document.getElementById("responseAlertIcon").textContent = "⏳";
-      document.getElementById("responseAlertTitle").textContent = "NEW RESPONSE ALERT";
+      document.getElementById("responseAlertTitle").textContent = "NEW RESPONSE ALERT — STANDBY FOR INCOMING DISPATCH";
       document.getElementById("responseAlertSub").textContent = "MONITORING LIVE FEED FOR REAL-TIME EMERGENCY DISPATCHES...";
       document.getElementById("responseAlertTimerBadge").classList.add("hidden");
       document.getElementById("responseAlertContent").innerHTML = `NO RECENT EMERGENCY RESPONSE LOGGED YET. LIVE STREAM IS ACTIVE.`;
@@ -797,6 +1121,7 @@
         mainTableCard.classList.add("hidden");
         renderDynamicWidgets([], []);
         document.getElementById("reportingStationsBadgeContainer").classList.add("hidden");
+        document.getElementById("columnMappingWarning").classList.add("hidden");
         return;
       } else {
         controlFilterTab.classList.remove("hidden");
@@ -823,6 +1148,8 @@
         processedHeaders = cleaned.cleanHeaders;
         processedRows = cleaned.cleanRows;
 
+        checkColumnMapping(processedHeaders);
+
         if (currentSectionKey === 'active-dispatches') {
           processedRows.forEach(row => {
             const uniqueId = row[0] + (row[1] || '');
@@ -839,14 +1166,37 @@
         }
 
         applyCombinedFilters();
+
+        // Fetch + parse succeeded — mark sync healthy
+        lastSuccessfulFetch = new Date();
+        consecutiveFetchFailures = 0;
+        lastFetchError = null;
+        updateDataStatusBadge();
       } catch (error) {
         console.error("Error fetching section data:", error);
+        consecutiveFetchFailures++;
+        lastFetchError = (error && error.message) ? error.message : "Network error";
+        updateDataStatusBadge();
       }
     }
 
-    function toggleStationsWithUnserviceableTabFilter() {
+    function toggleUnserviceableFilterTruck() {
       if (currentSectionKey !== 'fire-ops') return;
-      stationsWithUnserviceableTabFilterActive = !stationsWithUnserviceableTabFilterActive;
+      if (stationsWithUnserviceableTabFilterActive === 'truck') {
+        stationsWithUnserviceableTabFilterActive = false;
+      } else {
+        stationsWithUnserviceableTabFilterActive = 'truck';
+      }
+      applyCombinedFilters();
+    }
+
+    function toggleUnserviceableFilterAmbulance() {
+      if (currentSectionKey !== 'fire-ops') return;
+      if (stationsWithUnserviceableTabFilterActive === 'ambulance') {
+        stationsWithUnserviceableTabFilterActive = false;
+      } else {
+        stationsWithUnserviceableTabFilterActive = 'ambulance';
+      }
       applyCombinedFilters();
     }
 
@@ -854,6 +1204,7 @@
       const stationIdx = findColumnIndex(processedHeaders, ["station"]);
       const provIdx = findColumnIndex(processedHeaders, ["province"]);
       const unservIdx = findColumnIndex(processedHeaders, ["unserviceable"]);
+      const unservAmbIdx = findColumnIndex(processedHeaders, ["unserviceable ambulance"]);
 
       if (stationIdx === -1) return [];
 
@@ -862,9 +1213,12 @@
         const province = provIdx !== -1 ? (r[provIdx] || '').toLowerCase() : '';
         const stationName = (r[stationIdx] || '').trim();
         const unservCount = unservIdx !== -1 ? safeParse(r[unservIdx]) : 0;
+        const unservAmbCount = unservAmbIdx !== -1 ? safeParse(r[unservAmbIdx]) : 0;
 
         if (currentProvinceFilter === 'ALL' || province.includes(currentProvinceFilter)) {
-          if (!stationsWithUnserviceableTabFilterActive || unservCount > 0) {
+          if (!stationsWithUnserviceableTabFilterActive || 
+              (stationsWithUnserviceableTabFilterActive === 'truck' && unservCount > 0) || 
+              (stationsWithUnserviceableTabFilterActive === 'ambulance' && unservAmbCount > 0)) {
             if (stationName) stationsSet.add(stationName);
           }
         }
@@ -919,6 +1273,7 @@
       const stationIdx = findColumnIndex(processedHeaders, ["station"]);
       const provIdx = findColumnIndex(processedHeaders, ["province"]);
       const unservIdx = findColumnIndex(processedHeaders, ["unserviceable"]);
+      const unservAmbIdx = findColumnIndex(processedHeaders, ["unserviceable ambulance"]);
 
       let filteredRows = config.filterRows(processedRows, processedHeaders);
 
@@ -926,8 +1281,10 @@
         filteredRows = filteredRows.filter(r => (r[provIdx] || '').toLowerCase().includes(currentProvinceFilter));
       }
 
-      if (stationsWithUnserviceableTabFilterActive && unservIdx !== -1) {
+      if (stationsWithUnserviceableTabFilterActive === 'truck' && unservIdx !== -1) {
         filteredRows = filteredRows.filter(r => safeParse(r[unservIdx]) > 0);
+      } else if (stationsWithUnserviceableTabFilterActive === 'ambulance' && unservAmbIdx !== -1) {
+        filteredRows = filteredRows.filter(r => safeParse(r[unservAmbIdx]) > 0);
       }
 
       if (currentSelectedStation !== "ALL" && stationIdx !== -1) {
@@ -942,7 +1299,70 @@
 
       renderDynamicWidgets(processedHeaders, filteredRows);
       if (currentSectionKey === 'fire-ops') checkCriticalOperationalAlerts(processedHeaders, filteredRows);
-      renderDynamicMainTable(processedHeaders, filteredRows);
+
+      if (currentSectionKey === 'personnel-attendance' && currentAttendanceSubTab === 'trend') {
+        renderAttendanceTrendTable(processedHeaders, filteredRows);
+      } else {
+        renderDynamicMainTable(processedHeaders, filteredRows);
+      }
+    }
+
+    // Builds a computed day-by-day attendance rate table (distinct from the raw sheet
+    // table) since "trend" is an aggregation across all logged dates, not a single row view.
+    function renderAttendanceTrendTable(headers, rows) {
+      const tableHead = document.getElementById("mainTableHead");
+      const tableBody = document.getElementById("mainTableBody");
+      const tsIdx = findColumnIndex(headers, ["timestamp"]);
+      const statusIdx = findColumnIndex(headers, ["status"]);
+
+      const dateMap = {}; // date label -> { present, late, absent, onLeave, total }
+      rows.forEach(row => {
+        const raw = tsIdx !== -1 ? row[tsIdx] : '';
+        if (!raw) return;
+        const d = new Date(raw);
+        const dateKey = isNaN(d.getTime()) ? raw.split(' ')[0] : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        if (!dateMap[dateKey]) dateMap[dateKey] = { present: 0, late: 0, absent: 0, onLeave: 0, total: 0 };
+        const status = (statusIdx !== -1 ? row[statusIdx] : '').toLowerCase();
+        dateMap[dateKey].total++;
+        if (status.includes("late")) dateMap[dateKey].late++;
+        else if (status.includes("present")) dateMap[dateKey].present++;
+        else if (status.includes("leave")) dateMap[dateKey].onLeave++;
+        else if (status.includes("absent")) dateMap[dateKey].absent++;
+      });
+
+      const dateKeys = Object.keys(dateMap);
+
+      tableHead.innerHTML = `<tr class="text-slate-400 text-xs uppercase border-b border-slate-800/80 bg-slate-950/40">
+        <th class="p-3.5 font-black text-white bg-rose-950/50 border-x border-rose-500/50 shadow-inner"><strong>DATE</strong></th>
+        <th class="p-3.5 font-bold">TOTAL LOGGED</th>
+        <th class="p-3.5 font-bold">PRESENT</th>
+        <th class="p-3.5 font-bold">LATE</th>
+        <th class="p-3.5 font-bold">ABSENT</th>
+        <th class="p-3.5 font-bold">ON LEAVE</th>
+        <th class="p-3.5 font-bold">ATTENDANCE RATE</th>
+      </tr>`;
+
+      if (dateKeys.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500 font-medium">No attendance records found yet.</td></tr>`;
+        return;
+      }
+
+      let bodyHtml = "";
+      dateKeys.forEach(dateKey => {
+        const d = dateMap[dateKey];
+        const rate = d.total > 0 ? (((d.present + d.late) / d.total) * 100).toFixed(1) : "0.0";
+        const rateColor = parseFloat(rate) >= 80 ? "text-emerald-400" : "text-amber-400";
+        bodyHtml += `<tr class="hover:bg-slate-800/40 transition-colors">
+          <td class="p-3.5"><strong class="text-white font-black">${dateKey}</strong></td>
+          <td class="p-3.5"><span class="text-slate-300">${d.total}</span></td>
+          <td class="p-3.5"><span class="text-emerald-300">${d.present}</span></td>
+          <td class="p-3.5"><span class="text-amber-300">${d.late}</span></td>
+          <td class="p-3.5"><span class="text-rose-300">${d.absent}</span></td>
+          <td class="p-3.5"><span class="text-orange-300">${d.onLeave}</span></td>
+          <td class="p-3.5"><span class="${rateColor} font-black">${rate}%</span></td>
+        </tr>`;
+      });
+      tableBody.innerHTML = bodyHtml;
     }
 
     function dismissTopBanner() {
@@ -1048,8 +1468,12 @@
 
       card.className = `bg-gradient-to-br ${item.bg} border-2 ${item.border} rounded-3xl p-5 shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between min-h-[130px] overflow-hidden${clickableClasses}`;
       
-      if (item.clickable && item.action === "toggleUnserviceableFilter") {
-        card.setAttribute("onclick", "toggleStationsWithUnserviceableTabFilter()");
+      if (item.clickable) {
+        if (item.action === "toggleUnserviceableFilterTruck") {
+          card.setAttribute("onclick", "toggleUnserviceableFilterTruck()");
+        } else if (item.action === "toggleUnserviceableFilterAmbulance") {
+          card.setAttribute("onclick", "toggleUnserviceableFilterAmbulance()");
+        }
       }
 
       card.innerHTML = `
@@ -1139,7 +1563,8 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       updateClock();
-      setInterval(updateClock, 1000);
+      updateDataStatusBadge();
+      setInterval(() => { updateClock(); updateDataStatusBadge(); }, 1000);
 
       loadDashboardData();
       setInterval(loadDashboardData, 10000);
@@ -1214,6 +1639,22 @@
         });
       });
 
+      document.querySelectorAll('.attendance-tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.attendance-tab-btn').forEach(b => {
+            b.classList.remove('bg-rose-600', 'text-white', 'shadow-md', 'shadow-rose-600/30');
+            b.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-slate-800/80');
+          });
+
+          const activeBtn = e.currentTarget;
+          activeBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800/80');
+          activeBtn.classList.add('bg-rose-600', 'text-white', 'shadow-md', 'shadow-rose-600/30');
+
+          currentAttendanceSubTab = activeBtn.getAttribute('data-attendance-tab');
+          applyCombinedFilters();
+        });
+      });
+
       document.querySelectorAll('.section-btn').forEach(button => {
         button.addEventListener('click', (e) => {
           document.querySelectorAll('.section-btn').forEach(btn => {
@@ -1237,6 +1678,7 @@
           bannerDismissed = false;
           
           const opsSubTabs = document.getElementById("opsSubTabsContainer");
+          const attendanceSubTabs = document.getElementById("attendanceSubTabsContainer");
           const reportingBadge = document.getElementById("reportingStationsBadgeContainer");
 
           if (currentSectionKey === 'fire-ops') {
@@ -1250,6 +1692,13 @@
             currentOpsSubTab = 'overview';
           }
 
+          if (currentSectionKey === 'personnel-attendance') {
+            attendanceSubTabs.classList.remove("hidden");
+          } else {
+            attendanceSubTabs.classList.add("hidden");
+            currentAttendanceSubTab = 'today';
+          }
+
           document.querySelectorAll('.section-exclusive-widget').forEach(el => el.classList.add('hidden'));
           const activeConfig = SECTIONS[currentSectionKey];
           const targetContainerId = activeConfig.getWidgetContainerId();
@@ -1257,6 +1706,7 @@
           if (targetContainer) targetContainer.classList.remove('hidden');
 
           if (currentSectionKey === 'active-dispatches') resetResponseAlertWidgetToBlank();
+          document.getElementById("columnMappingWarning").classList.add("hidden");
 
           if (activeConfig) {
             document.getElementById('hudTitle').innerHTML = `<span class="text-lg">${activeConfig.icon}</span> ${activeConfig.title.toUpperCase()} — LIVE STREAM FEED`;
